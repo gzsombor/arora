@@ -35,7 +35,9 @@ void ExtensionManager::loadPlugins()
     }
     #endif
     pluginsDir.cd(QLatin1String("plugins"));
+    qDebug() << "checking " << pluginsDir;
     foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
+        qDebug() << "loading " << fileName;
         QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
         QObject *plugin = loader.instance();
         if (plugin) {
@@ -47,6 +49,7 @@ void ExtensionManager::loadPlugins()
 void ExtensionManager::initPlugin(QObject *pluginObject)
 {
     AroraExtension *plugin =  qobject_cast<AroraExtension *>(pluginObject);
+    qDebug() << "plugin acquired " << (plugin!=NULL);
     if (plugin) {
         QString id = plugin->id();
         this->idToExtension[id] = plugin;
@@ -57,6 +60,8 @@ void ExtensionManager::initPlugin(QObject *pluginObject)
                 enabledExtensions.append(plugin);
             }
         }
+    } else {
+        qDebug() << "-> not an Arora extension";
     }
 }
 

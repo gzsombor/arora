@@ -13,7 +13,7 @@ public:
       * return a unique id for this plugin, this is used by the manager to
       * identifie the extension
       */
-    virtual const QString &id() const = 0;
+    virtual const QString id() const = 0;
 
     /**
       * Human readable/translated string, this will show up on the plugin
