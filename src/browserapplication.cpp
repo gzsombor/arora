@@ -71,6 +71,7 @@
 #include "historymanager.h"
 #include "languagemanager.h"
 #include "networkaccessmanager.h"
+#include "extensionmanager.h"
 #include "tabwidget.h"
 #include "webview.h"
 
@@ -98,6 +99,7 @@ NetworkAccessManager *BrowserApplication::s_networkAccessManager = 0;
 BookmarksManager *BrowserApplication::s_bookmarksManager = 0;
 LanguageManager *BrowserApplication::s_languageManager = 0;
 AutoFillManager *BrowserApplication::s_autoFillManager = 0;
+ExtensionManager *BrowserApplication::s_extensionManager = 0;
 
 BrowserApplication::BrowserApplication(int &argc, char **argv)
     : SingleApplication(argc, argv)
@@ -628,6 +630,14 @@ AutoFillManager *BrowserApplication::autoFillManager()
         s_autoFillManager = new AutoFillManager;
     }
     return s_autoFillManager;
+}
+
+ExtensionManager *BrowserApplication::extensionManager()
+{
+    if (!s_extensionManager) {
+        s_extensionManager = new ExtensionManager();
+    }
+    return s_extensionManager;
 }
 
 QIcon BrowserApplication::icon(const QUrl &url)

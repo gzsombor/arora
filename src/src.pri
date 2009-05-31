@@ -98,6 +98,7 @@ include(opensearch/opensearch.pri)
 include(qwebplugins/qwebplugins.pri)
 include(utils/utils.pri)
 include(useragent/useragent.pri)
+include(extensions/extensions.pri)
 
 RESOURCES += \
     $$PWD/data/data.qrc \

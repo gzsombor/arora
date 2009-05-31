@@ -78,6 +78,8 @@ class HistoryManager;
 class NetworkAccessManager;
 class LanguageManager;
 class QLocalSocket;
+class ExtensionManager;
+
 class BrowserApplication : public SingleApplication
 {
     Q_OBJECT
@@ -107,6 +109,7 @@ public:
 
     static QString installedDataDirectory();
     static QString dataFilePath(const QString &fileName);
+    static ExtensionManager *extensionManager();
 
     Qt::MouseButtons eventMouseButtons() const;
     Qt::KeyboardModifiers eventKeyboardModifiers() const;
@@ -154,6 +157,7 @@ private:
     static BookmarksManager *s_bookmarksManager;
     static LanguageManager *s_languageManager;
     static AutoFillManager *s_autoFillManager;
+    static ExtensionManager *s_extensionManager;
 
     QList<QPointer<BrowserMainWindow> > m_mainWindows;
     QByteArray m_lastSession;

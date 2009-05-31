@@ -76,6 +76,7 @@
 #include "browserapplication.h"
 #include "clearprivatedata.h"
 #include "downloadmanager.h"
+#include "extensionmanager.h"
 #include "history.h"
 #include "languagemanager.h"
 #include "networkaccessmanager.h"
@@ -227,11 +228,13 @@ BrowserMainWindow::BrowserMainWindow(QWidget *parent, Qt::WindowFlags flags)
 #if defined(Q_WS_X11)
     setWindowRole(QLatin1String("browser"));
 #endif
+    BrowserApplication::extensionManager()->newWindow(this, m_toolsMenu);
     retranslate();
 }
 
 BrowserMainWindow::~BrowserMainWindow()
 {
+    BrowserApplication::extensionManager()->closeWindow(this);
     m_autoSaver->changeOccurred();
     m_autoSaver->saveIfNeccessary();
 }
@@ -1013,6 +1016,8 @@ void BrowserMainWindow::retranslate()
 
     m_stopReloadAction->setText(tr("Reload / Stop"));
     updateStopReloadActionText(false);
+
+    BrowserApplication::extensionManager()->localize(this);
 }
 
 void BrowserMainWindow::setupToolBar()
