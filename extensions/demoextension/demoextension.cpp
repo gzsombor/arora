@@ -32,6 +32,7 @@ void DemoExtension::close() {
     foreach(WindowData* windowData, m_windowDatas) {
         delete windowData;
     }
+    m_windowDatas.clear();
 }
 
 void DemoExtension::newWindow(BrowserMainWindow *window, QMenu *extensionMenu)
