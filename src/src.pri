@@ -137,4 +137,4 @@ win32 {
     LIBS += -ladvapi32
 }
 
-LIBS += -L../../plugins -larora_api
+LIBS += -L$$PWD/../plugins -larora_api

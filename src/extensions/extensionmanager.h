@@ -20,10 +20,12 @@ public:
 
     void localize(BrowserMainWindow *window);
 
-    void setEnabled(const QString &id, bool enabled);
+    bool setEnabled(const QString &id, bool enabled);
 
     QList<QString> ids();
     bool isEnabled(const QString &id);
+
+    AroraExtension* plugin(const QString &id);
 
 private:
     void loadPlugins();

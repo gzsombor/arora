@@ -77,6 +77,7 @@
 #include "clearprivatedata.h"
 #include "downloadmanager.h"
 #include "extensionmanager.h"
+#include "extensiondialog.h"
 #include "history.h"
 #include "languagemanager.h"
 #include "networkaccessmanager.h"
@@ -854,6 +855,12 @@ void BrowserMainWindow::setupMenu()
             this, SLOT(preferences()));
     m_toolsMenu->addAction(m_toolsPreferencesAction);
 
+    m_toolsMenu->addSeparator();
+    m_extensionManagerAction = new QAction(m_toolsMenu);
+    connect(m_extensionManagerAction, SIGNAL(triggered()),
+            this, SLOT(showExtensionDialog()));
+    m_toolsMenu->addAction(m_extensionManagerAction);
+
     // Help
     m_helpMenu = new QMenu(menuBar());
     menuBar()->addMenu(m_helpMenu);
@@ -1004,6 +1011,7 @@ void BrowserMainWindow::retranslate()
     m_toolsSearchManagerAction->setText(tr("Configure Search Engines..."));
     m_toolsUserAgentMenu->setTitle(tr("User Agent"));
     m_adBlockDialogAction->setText(tr("&Ad Block..."));
+    m_extensionManagerAction->setText(tr("E&xtensions..."));
 
     m_helpMenu->setTitle(tr("&Help"));
     m_helpChangeLanguageAction->setText(tr("Switch application language "));
@@ -1594,3 +1602,8 @@ void BrowserMainWindow::geometryChangeRequested(const QRect &geometry)
     setGeometry(geometry);
 }
 
+void BrowserMainWindow::showExtensionDialog()
+{
+    ExtensionDialog *dialog = new ExtensionDialog(BrowserApplication::extensionManager(), this);
+    dialog->exec();
+}

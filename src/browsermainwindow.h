@@ -167,6 +167,8 @@ private slots:
     void printRequested(QWebFrame *frame);
     void geometryChangeRequested(const QRect &geometry);
 
+    void showExtensionDialog();
+
 private:
     void retranslate();
     void loadDefaultState();
@@ -236,6 +238,7 @@ private:
     QAction *m_toolsSearchManagerAction;
     UserAgentMenu *m_toolsUserAgentMenu;
     QAction *m_adBlockDialogAction;
+    QAction *m_extensionManagerAction;
 
     QMenu *m_helpMenu;
     QAction *m_helpChangeLanguageAction;

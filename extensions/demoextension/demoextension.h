@@ -57,7 +57,7 @@ public:
       */
     void localize(BrowserMainWindow *window);
 
-
+    void configure() {}
 
 
 private:

@@ -48,6 +48,8 @@ public:
       */
     virtual void localize(BrowserMainWindow *window) = 0;
 
+
+    virtual void configure() = 0;
 };
 
 Q_DECLARE_INTERFACE(AroraExtension, "org.arora-browser.Extension/1.0")

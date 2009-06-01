@@ -72,22 +72,29 @@ bool ExtensionManager::isPluginEnabledBySetting(const QString &id) const
     return true;
 }
 
-void ExtensionManager::setEnabled(const QString &id, bool enabled)
+bool ExtensionManager::setEnabled(const QString &id, bool enabled)
 {
     bool oldStatus = isEnabled(id);
     if (oldStatus == enabled) {
-        return;
+        return oldStatus;
     }
     AroraExtension *plugin = idToExtension[id];
     if (plugin) {
         if (enabled) {
             if (plugin->init(api)) {
                 enabledExtensions.append(plugin);
+                return enabled;
             }
+            return false;
         } else {
-            plugin->close();
+            if (enabledExtensions.removeOne(plugin)) {
+                plugin->close();
+                return false;
+            }
+            return true;
         }
     }
+    return false;
 }
 
 QList<QString> ExtensionManager::ids()
@@ -98,6 +105,11 @@ QList<QString> ExtensionManager::ids()
 bool ExtensionManager::isEnabled(const QString &id)
 {
     return enabledExtensions.contains(idToExtension[id]);
+}
+
+AroraExtension* ExtensionManager::plugin(const QString &id)
+{
+    return idToExtension[id];
 }
 
 
