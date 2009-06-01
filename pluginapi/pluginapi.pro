@@ -11,3 +11,13 @@ HEADERS += pluginapi.h aroraapi.h
 SOURCES += pluginapi.cpp
 
 DEFINES += PLUGINAPI_LIBRARY
+
+!win32 {
+    exists($$PWD/../.git/HEAD) {
+        # Share object files for faster compiling
+        RCC_DIR     = $$PWD/.rcc
+        UI_DIR      = $$PWD/.ui
+        MOC_DIR     = $$PWD/.moc
+        OBJECTS_DIR = $$PWD/.obj
+    }
+}
