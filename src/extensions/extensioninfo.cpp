@@ -43,6 +43,11 @@ WindowExtension *ExtensionInfo::windowExtension() const
     return qobject_cast<WindowExtension *> (extensionObject);
 }
 
+AroraWebPlugin *ExtensionInfo::webPlugin() const
+{
+    return qobject_cast<AroraWebPlugin *> (extensionObject);
+}
+
 const QString ExtensionInfo::id() const
 {
     return this->extension()->id();

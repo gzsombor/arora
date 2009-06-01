@@ -3,7 +3,7 @@
 
 #include "aroraextension.h"
 #include "windowextension.h"
-
+#include "arorawebplugin.h"
 
 #include "qobject.h"
 
@@ -17,6 +17,7 @@ public:
 
     AroraExtension *extension() const;
     WindowExtension *windowExtension() const;
+    AroraWebPlugin *webPlugin() const;
 
     inline const QString id() const;
 

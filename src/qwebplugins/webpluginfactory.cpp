@@ -20,6 +20,8 @@
 #include "webpluginfactory.h"
 
 #include "clicktoflashplugin.h"
+#include "extensionmanager.h"
+#include "browserapplication.h"
 
 #include <qwidget.h>
 #include <qurl.h>
@@ -87,7 +89,15 @@ void WebPluginFactory::init() const
     m_pluginsCache.clear();
     qDeleteAll(m_plugins);
     m_plugins.clear();
-    m_plugins.append(new ClickToFlashPlugin);
+
+    foreach (ExtensionInfo *plugin, BrowserApplication::extensionManager()->enabledExtensionInfo()) {
+        AroraWebPlugin *webPlugin = plugin->webPlugin();
+        if (webPlugin) {
+            m_plugins.append(webPlugin);
+        }
+    }
+
+    //m_plugins.append(new ClickToFlashPlugin);
     foreach (AroraWebPlugin *plugin, m_plugins) {
         foreach (const QWebPluginFactory::MimeType &pluginMimeType, plugin->metaPlugin().mimeTypes)
             m_pluginsCache.insert(pluginMimeType.name, plugin);

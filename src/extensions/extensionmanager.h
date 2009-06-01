@@ -26,6 +26,7 @@ public:
 
     ExtensionInfo* plugin(const QString &id);
 
+    QList<ExtensionInfo *> enabledExtensionInfo();
 
     bool activatePlugin(ExtensionInfo *plugin);
     bool deactivatePlugin(ExtensionInfo *plugin);

@@ -45,5 +45,8 @@ public:
     virtual bool isAnonymous() const;
 };
 
+Q_DECLARE_INTERFACE(AroraWebPlugin, "org.arora-browser.WebPlugin/1.0")
+
+
 #endif // ARORAWEBPLUGIN_H
 

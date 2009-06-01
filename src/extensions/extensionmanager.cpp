@@ -105,12 +105,21 @@ QList<QString> ExtensionManager::ids()
     return this->idToExtension.keys();
 }
 
+QList<ExtensionInfo *> ExtensionManager::enabledExtensionInfo()
+{
+    QList<ExtensionInfo *> result;
+    foreach(ExtensionInfo *info, this->extensions) {
+        if (info->isEnabled()) {
+            result.append(info);
+        }
+    }
+    return result;
+}
 
 ExtensionInfo* ExtensionManager::plugin(const QString &id)
 {
     return idToExtension[id];
 }
-
 
 void ExtensionManager::newWindow(BrowserMainWindow *window, QMenu *extensionMenu)
 {

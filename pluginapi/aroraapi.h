@@ -5,6 +5,7 @@
 
 #include "extensions/aroraextension.h"
 #include "extensions/windowextension.h"
+#include "qwebplugins/arorawebplugin.h"
 #include "pluginapi.h"
 #include "browsermainwindow.h"
 
