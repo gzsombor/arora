@@ -30,6 +30,7 @@ private:
     void initPlugin(QObject *plugin);
     bool isPluginEnabledBySetting(const QString &id) const;
 
+    PluginApi *api;
     QList<AroraExtension*> extensions;
     QHash<QString,AroraExtension*> idToExtension;
     QList<AroraExtension*> enabledExtensions;

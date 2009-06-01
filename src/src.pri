@@ -136,3 +136,5 @@ unix {
 win32 {
     LIBS += -ladvapi32
 }
+
+LIBS += -L../../plugins -larora_api

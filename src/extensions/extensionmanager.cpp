@@ -6,6 +6,7 @@
 
 ExtensionManager::ExtensionManager()
 {
+    this->api = new PluginApi();
     this->loadPlugins();
 }
 
@@ -56,7 +57,7 @@ void ExtensionManager::initPlugin(QObject *pluginObject)
         qDebug() << "init plugin " << id;
         extensions.append(plugin);
         if (isPluginEnabledBySetting(plugin->id())) {
-            if (plugin->init()) {
+            if (plugin->init(this->api)) {
                 enabledExtensions.append(plugin);
             }
         }
@@ -80,7 +81,7 @@ void ExtensionManager::setEnabled(const QString &id, bool enabled)
     AroraExtension *plugin = idToExtension[id];
     if (plugin) {
         if (enabled) {
-            if (plugin->init()) {
+            if (plugin->init(api)) {
                 enabledExtensions.append(plugin);
             }
         } else {

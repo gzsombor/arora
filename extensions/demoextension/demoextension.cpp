@@ -1,9 +1,6 @@
 #include "demoextension.h"
 
 #include "qaction.h"
-#include "browserapplication.h"
-#include "cookiedialog.h"
-#include "cookieexceptionsdialog.h"
 
 
 
@@ -26,7 +23,8 @@ const QString DemoExtension::name() const
     return "Simple Extension which add some menu items ...";
 }
 
-bool DemoExtension::init() {
+bool DemoExtension::init(PluginApi *api) {
+    this->api = api;
     return true;
 }
 
@@ -60,14 +58,15 @@ WindowData* DemoExtension::getData(BrowserMainWindow* window)
 {
     WindowData *wd = this->m_windowDatas.value(window);
     if (wd == NULL) {
-        wd = new WindowData(window);
+        wd = new WindowData(this->api, window);
         this->m_windowDatas.insert(window, wd);
     }
     return wd;
 }
 
-WindowData::WindowData(BrowserMainWindow* window) : m_toolsCookiesAction(0), m_toolsCookieExceptionAction (0)
+WindowData::WindowData(PluginApi *api, BrowserMainWindow* window) : m_toolsCookiesAction(0), m_toolsCookieExceptionAction (0)
 {
+    this->api = api;
     this->extensionMenu = 0;
     this->window = window;
 }
@@ -102,14 +101,12 @@ void WindowData::localize()
 
 void WindowData::showCookies()
 {
-    CookieDialog *dialog = new CookieDialog(BrowserApplication::cookieJar(), this->window);
-    dialog->exec();
+    this->api->showCookiesDialog(this->window);
 }
 
 void WindowData::showExceptions()
 {
-    CookieExceptionsDialog *dialog = new CookieExceptionsDialog(BrowserApplication::cookieJar(), this->window);
-    dialog->exec();
+    this->api->showCookieExceptionsDialog(this->window);
 }
 
 Q_EXPORT_PLUGIN2(AroraExtension, DemoExtension)

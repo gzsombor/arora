@@ -2,7 +2,7 @@
 #define ARORAEXTENSION_H
 
 #include "browsermainwindow.h"
-
+#include "pluginapi.h"
 
 class AroraExtension
 {
@@ -25,7 +25,7 @@ public:
       * this method called before the extension is activated, should return true
       * if succeeded.
       */
-    virtual bool init() = 0;
+    virtual bool init(PluginApi *api) = 0;
 
     /**
       * this method called before the extension is deactivated

@@ -1,7 +1,7 @@
 #ifndef DEMOEXTENSION_H
 #define DEMOEXTENSION_H
 
-#include "extensions/aroraapi.h"
+#include "aroraapi.h"
 
 #include "qhash.h"
 
@@ -34,7 +34,7 @@ public:
       * this method called before the extension is activated, should return true
       * if succeeded.
       */
-    bool init();
+    bool init(PluginApi *api);
 
     /**
       * this method called before the extension is deactivated
@@ -61,10 +61,8 @@ public:
 
 
 private:
-
+    PluginApi *api;
     QHash<BrowserMainWindow*,WindowData*> m_windowDatas;
-
-
     WindowData* getData(BrowserMainWindow* window);
 };
 
@@ -74,7 +72,7 @@ class WindowData : public QObject
     Q_OBJECT
 
 public:
-    WindowData(BrowserMainWindow* window);
+    WindowData(PluginApi *api, BrowserMainWindow* window);
     ~WindowData();
 
     void setup(QMenu *extensionMenu);
@@ -90,6 +88,7 @@ private:
     QAction *m_toolsCookieExceptionAction;
     QMenu *extensionMenu;
     BrowserMainWindow *window;
+    PluginApi *api;
 };
 
 
