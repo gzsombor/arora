@@ -39,16 +39,16 @@ void ExtensionDialog::setupExtensionList()
 {
     int position = 0;
     foreach (QString pluginId, this->manager->ids()) {
-        AroraExtension *extension = this->manager->plugin(pluginId);
+        ExtensionInfo *info = this->manager->plugin(pluginId);
 
-        ExtensionInfo *info = new ExtensionInfo(this->manager, extension);
+        QString name = info->extension()->name();
 
         QCheckBox *checkBox = new QCheckBox(m_ui->extGroupBox);
         checkBox->setObjectName(QString::fromUtf8("checkBox-") + pluginId);
-        checkBox->setText(extension->name());
-        checkBox->setToolTip(extension->name());
+        checkBox->setText(name);
+        checkBox->setToolTip(name);
 
-        checkBox->setChecked(this->manager->isEnabled(pluginId));
+        checkBox->setChecked(info->isEnabled());
 
         m_ui->formLayout->setWidget(position, QFormLayout::LabelRole, checkBox);
 
@@ -58,8 +58,8 @@ void ExtensionDialog::setupExtensionList()
 
         m_ui->formLayout->setWidget(position, QFormLayout::FieldRole, pushButton);
 
-        connect(checkBox, SIGNAL(toggled(bool)), info, SLOT(checked(bool)));
-        connect(pushButton, SIGNAL(clicked()), info, SLOT(configure()));
+        connect(checkBox, SIGNAL(toggled(bool)), info, SLOT(setEnabled(bool)));
+        connect(pushButton, SIGNAL(clicked()), info, SLOT(callConfigure()));
         position++;
     }
 }

@@ -7,10 +7,11 @@
 
 class WindowData;
 
-class DemoExtension : public QObject, public AroraExtension
+class DemoExtension : public QObject, AroraExtension, WindowExtension
 {
     Q_OBJECT
     Q_INTERFACES(AroraExtension)
+    Q_INTERFACES(WindowExtension)
 
 public:
     DemoExtension();
@@ -34,12 +35,12 @@ public:
       * this method called before the extension is activated, should return true
       * if succeeded.
       */
-    bool init(PluginApi *api);
+    bool activate(PluginApi *api);
 
     /**
       * this method called before the extension is deactivated
       */
-    void close();
+    void deactivate();
 
     /**
       * this method called after a new application window is created.

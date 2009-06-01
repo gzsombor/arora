@@ -1,22 +1,49 @@
 #include "extensioninfo.h"
-
+#include "extensionmanager.h"
 #include "qdebug.h"
 
-ExtensionInfo::ExtensionInfo(ExtensionManager *manager, AroraExtension *extension)
+ExtensionInfo::ExtensionInfo(ExtensionManager *manager, QObject *extensionObject)
 {
     this->manager = manager;
-    this->extension = extension;
+    this->extensionObject = extensionObject;
+    this->enabled = false;
 }
 
-void ExtensionInfo::checked(bool flag)
+void ExtensionInfo::setEnabled(bool newState)
 {
-    qDebug() << "checked " << flag;
-    bool result = this->manager->setEnabled(this->extension->id(), flag);
-    qDebug() << "result " << result;
-
+    if (this->enabled==newState) {
+        return;
+    }
+    qDebug() << "checked " << newState;
+    bool success = false;
+    if (newState) {
+        success = this->manager->activatePlugin(this);
+    } else {
+        success = this->manager->deactivatePlugin(this);
+    }
+    if (success) {
+        this->enabled = newState;
+    }
+    qDebug() << "result " << this->enabled;
 }
 
-void ExtensionInfo::configure()
+void ExtensionInfo::callConfigure()
 {
-    this->extension->configure();
+    this->extension()->configure();
+}
+
+
+AroraExtension *ExtensionInfo::extension() const
+{
+    return qobject_cast<AroraExtension *> (extensionObject);
+}
+
+WindowExtension *ExtensionInfo::windowExtension() const
+{
+    return qobject_cast<WindowExtension *> (extensionObject);
+}
+
+const QString ExtensionInfo::id() const
+{
+    return this->extension()->id();
 }

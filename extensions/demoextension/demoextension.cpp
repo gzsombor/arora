@@ -23,12 +23,12 @@ const QString DemoExtension::name() const
     return "Simple Extension which add some menu items ...";
 }
 
-bool DemoExtension::init(PluginApi *api) {
+bool DemoExtension::activate(PluginApi *api) {
     this->api = api;
     return true;
 }
 
-void DemoExtension::close() {
+void DemoExtension::deactivate() {
     foreach(WindowData* windowData, m_windowDatas) {
         delete windowData;
     }

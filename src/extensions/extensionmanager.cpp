@@ -13,10 +13,8 @@ ExtensionManager::ExtensionManager()
 ExtensionManager::~ExtensionManager()
 {
     foreach (AroraExtension *plugin, this->enabledExtensions) {
-        plugin->close();
+        plugin->deactivate();
     }
-    //delete enabledExtensions;
-    //delete extensions;
 }
 
 void ExtensionManager::loadPlugins()
@@ -53,13 +51,12 @@ void ExtensionManager::initPlugin(QObject *pluginObject)
     qDebug() << "plugin acquired " << (plugin!=NULL);
     if (plugin) {
         QString id = plugin->id();
-        this->idToExtension[id] = plugin;
+        ExtensionInfo *info = new ExtensionInfo(this, pluginObject);
+        this->idToExtension.insert(id,info);
         qDebug() << "init plugin " << id;
-        extensions.append(plugin);
-        if (isPluginEnabledBySetting(plugin->id())) {
-            if (plugin->init(this->api)) {
-                enabledExtensions.append(plugin);
-            }
+        extensions.append(info);
+        if (isPluginEnabledBySetting(id)) {
+            activatePlugin(info);
         }
     } else {
         qDebug() << "-> not an Arora extension";
@@ -72,27 +69,33 @@ bool ExtensionManager::isPluginEnabledBySetting(const QString &id) const
     return true;
 }
 
-bool ExtensionManager::setEnabled(const QString &id, bool enabled)
+bool ExtensionManager::activatePlugin(ExtensionInfo *info)
 {
-    bool oldStatus = isEnabled(id);
-    if (oldStatus == enabled) {
-        return oldStatus;
-    }
-    AroraExtension *plugin = idToExtension[id];
-    if (plugin) {
-        if (enabled) {
-            if (plugin->init(api)) {
-                enabledExtensions.append(plugin);
-                return enabled;
-            }
-            return false;
-        } else {
-            if (enabledExtensions.removeOne(plugin)) {
-                plugin->close();
-                return false;
-            }
-            return true;
+    AroraExtension *extension = info->extension();
+    if (extension->activate(this->api)) {
+        enabledExtensions.append(extension);
+        WindowExtension *windowPlugin = info->windowExtension();
+        if (windowPlugin) {
+            enabledWindowExtensions.append(windowPlugin);
         }
+        return true;
+    }
+    return false;
+}
+
+/**
+  * return true if deactivation succeeded.
+  */
+bool ExtensionManager::deactivatePlugin(ExtensionInfo *info)
+{
+    WindowExtension *windowPlugin = info->windowExtension();
+    if (windowPlugin) {
+        enabledWindowExtensions.removeOne(windowPlugin);
+    }
+    AroraExtension *extension = info->extension();
+    if (enabledExtensions.removeOne(extension)) {
+        extension->deactivate();
+        return true;
     }
     return false;
 }
@@ -102,12 +105,8 @@ QList<QString> ExtensionManager::ids()
     return this->idToExtension.keys();
 }
 
-bool ExtensionManager::isEnabled(const QString &id)
-{
-    return enabledExtensions.contains(idToExtension[id]);
-}
 
-AroraExtension* ExtensionManager::plugin(const QString &id)
+ExtensionInfo* ExtensionManager::plugin(const QString &id)
 {
     return idToExtension[id];
 }
@@ -115,21 +114,21 @@ AroraExtension* ExtensionManager::plugin(const QString &id)
 
 void ExtensionManager::newWindow(BrowserMainWindow *window, QMenu *extensionMenu)
 {
-    foreach(AroraExtension *plugin, this->enabledExtensions) {
+    foreach(WindowExtension *plugin, this->enabledWindowExtensions) {
         plugin->newWindow(window, extensionMenu);
     }
 }
 
 void ExtensionManager::closeWindow(BrowserMainWindow *window)
 {
-    foreach(AroraExtension *plugin, this->enabledExtensions) {
+    foreach(WindowExtension *plugin, this->enabledWindowExtensions) {
         plugin->closeWindow(window);
     }
 }
 
 void ExtensionManager::localize(BrowserMainWindow *window)
 {
-    foreach(AroraExtension *plugin, this->enabledExtensions) {
+    foreach(WindowExtension *plugin, this->enabledWindowExtensions) {
         plugin->localize(window);
     }
 }

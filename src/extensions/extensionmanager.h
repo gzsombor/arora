@@ -4,7 +4,9 @@
 #include "qobject.h"
 #include "qlist.h"
 #include "qhash.h"
+#include "extensioninfo.h"
 #include "aroraextension.h"
+#include "windowextension.h"
 
 class ExtensionManager : public QObject
 {
@@ -20,22 +22,26 @@ public:
 
     void localize(BrowserMainWindow *window);
 
-    bool setEnabled(const QString &id, bool enabled);
-
     QList<QString> ids();
-    bool isEnabled(const QString &id);
 
-    AroraExtension* plugin(const QString &id);
+    ExtensionInfo* plugin(const QString &id);
+
+
+    bool activatePlugin(ExtensionInfo *plugin);
+    bool deactivatePlugin(ExtensionInfo *plugin);
 
 private:
     void loadPlugins();
     void initPlugin(QObject *plugin);
     bool isPluginEnabledBySetting(const QString &id) const;
 
+
     PluginApi *api;
-    QList<AroraExtension*> extensions;
-    QHash<QString,AroraExtension*> idToExtension;
-    QList<AroraExtension*> enabledExtensions;
+    QList<ExtensionInfo *> extensions;
+    QHash<QString,ExtensionInfo *> idToExtension;
+    QList<AroraExtension *> enabledExtensions;
+    QList<WindowExtension *> enabledWindowExtensions;
+
 };
 
 #endif // EXTENSIONMANAGER_H

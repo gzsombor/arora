@@ -2,23 +2,34 @@
 #define EXTENSIONINFO_H
 
 #include "aroraextension.h"
-#include "extensionmanager.h"
+#include "windowextension.h"
+
 
 #include "qobject.h"
+
+class ExtensionManager;
 
 class ExtensionInfo : public QObject
 {
     Q_OBJECT
 public:
-    ExtensionInfo(ExtensionManager *manager, AroraExtension *extension);
+    ExtensionInfo(ExtensionManager *manager, QObject *extensionObject);
 
+    AroraExtension *extension() const;
+    WindowExtension *windowExtension() const;
+
+    inline const QString id() const;
+
+    bool isEnabled() const { return enabled; }
 public slots:
-    void checked(bool flag);
-    void configure();
+    void setEnabled(bool flag);
+    void callConfigure();
+
 
 private:
     ExtensionManager *manager;
-    AroraExtension *extension;
+    QObject *extensionObject;
+    bool enabled;
 
 };
 
