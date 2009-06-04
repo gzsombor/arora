@@ -22,7 +22,7 @@
     </widget>
    </item>
    <item>
-    <widget class="EditListView" name="whitelist"/>
+    <widget class="AroraEditListView" name="whitelist"/>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -38,9 +38,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>EditListView</class>
+   <class>AroraEditListView</class>
    <extends>QListView</extends>
-   <header>editlistview.h</header>
+   <header>aroraeditlistview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

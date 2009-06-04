@@ -3,10 +3,9 @@
 
 // Include this file from the plugins, this contains the necessary includes.
 
-#include "qplugin.h"
 #include "qobject.h"
-
 #include "qmenu.h"
+#include "qplugin.h"
 
 #include "browsermainwindow.h"
 
