@@ -38,6 +38,9 @@ public:
     QList<QWebPluginFactory::Plugin> plugins() const;
     void refreshPlugins();
 
+private slots:
+    void pluginStateChanged();
+
 private:
     void init() const;
     mutable bool m_loaded;

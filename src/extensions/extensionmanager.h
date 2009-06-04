@@ -31,6 +31,9 @@ public:
     bool activatePlugin(ExtensionInfo *plugin);
     bool deactivatePlugin(ExtensionInfo *plugin);
 
+signals:
+    void pluginStateChanged(ExtensionInfo *info);
+
 private:
     void loadPlugins();
     void initPlugin(QObject *plugin);

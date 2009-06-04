@@ -33,12 +33,19 @@ WebPluginFactory::WebPluginFactory(QObject *parent)
     : QWebPluginFactory(parent)
     , m_loaded(false)
 {
+    connect(BrowserApplication::extensionManager(),SIGNAL(pluginStateChanged(ExtensionInfo*)), this, SLOT(pluginStateChanged()));
 }
 
 WebPluginFactory::~WebPluginFactory()
 {
-    qDeleteAll(m_plugins);
+    // as we don't allocate anymore the plugins, it is bad to free it now ...
+    //qDeleteAll(m_plugins);
     m_plugins.clear();
+}
+
+void WebPluginFactory::pluginStateChanged()
+{
+    this->m_loaded = false;
 }
 
 QObject *WebPluginFactory::create(const QString &mimeType, const QUrl &url, const QStringList &argumentNames, const QStringList &argumentValues) const

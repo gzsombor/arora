@@ -83,6 +83,7 @@ bool ExtensionManager::activatePlugin(ExtensionInfo *info)
         if (windowPlugin) {
             enabledWindowExtensions.append(windowPlugin);
         }
+        emit pluginStateChanged(info);
         return true;
     }
     return false;
@@ -100,6 +101,7 @@ bool ExtensionManager::deactivatePlugin(ExtensionInfo *info)
     AroraExtension *extension = info->extension();
     if (enabledExtensions.removeOne(extension)) {
         extension->deactivate();
+        emit pluginStateChanged(info);
         return true;
     }
     return false;
