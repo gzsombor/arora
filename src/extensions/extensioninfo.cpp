@@ -2,11 +2,11 @@
 #include "extensionmanager.h"
 #include "qdebug.h"
 
-ExtensionInfo::ExtensionInfo(ExtensionManager *manager, QObject *extensionObject)
+ExtensionInfo::ExtensionInfo(ExtensionManager *manager, QObject *extensionObject, bool initialState)
 {
     this->manager = manager;
     this->extensionObject = extensionObject;
-    this->enabled = false;
+    this->enabled = initialState;
 }
 
 void ExtensionInfo::setEnabled(bool newState)

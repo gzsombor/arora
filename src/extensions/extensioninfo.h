@@ -13,7 +13,7 @@ class ExtensionInfo : public QObject
 {
     Q_OBJECT
 public:
-    ExtensionInfo(ExtensionManager *manager, QObject *extensionObject);
+    ExtensionInfo(ExtensionManager *manager, QObject *extensionObject, bool initialState);
 
     AroraExtension *extension() const;
     WindowExtension *windowExtension() const;

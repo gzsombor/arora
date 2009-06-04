@@ -51,11 +51,12 @@ void ExtensionManager::initPlugin(QObject *pluginObject)
     qDebug() << "plugin acquired " << (plugin!=NULL);
     if (plugin) {
         QString id = plugin->id();
-        ExtensionInfo *info = new ExtensionInfo(this, pluginObject);
+        bool initialState = isPluginEnabledBySetting(id);
+        ExtensionInfo *info = new ExtensionInfo(this, pluginObject, initialState);
         this->idToExtension.insert(id,info);
         qDebug() << "init plugin " << id;
         extensions.append(info);
-        if (isPluginEnabledBySetting(id)) {
+        if (initialState) {
             activatePlugin(info);
         }
     } else {
