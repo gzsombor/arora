@@ -19,7 +19,7 @@
 
 #include "webpluginfactory.h"
 
-#include "clicktoflashplugin.h"
+// #include "clicktoflashplugin.h"
 #include "extensionmanager.h"
 #include "browserapplication.h"
 

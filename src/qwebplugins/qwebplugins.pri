@@ -9,5 +9,5 @@ SOURCES += \
   arorawebplugin.cpp \
   webpluginfactory.cpp
 
-include(clicktoflash/clicktoflash.pri)
+#include(clicktoflash/clicktoflash.pri)
 
