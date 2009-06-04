@@ -14,7 +14,6 @@ void ExtensionInfo::setEnabled(bool newState)
     if (this->enabled==newState) {
         return;
     }
-    qDebug() << "checked " << newState;
     bool success = false;
     if (newState) {
         success = this->manager->activatePlugin(this);
@@ -24,7 +23,6 @@ void ExtensionInfo::setEnabled(bool newState)
     if (success) {
         this->enabled = newState;
     }
-    qDebug() << "result " << this->enabled;
 }
 
 void ExtensionInfo::callConfigure()

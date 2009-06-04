@@ -51,13 +51,17 @@ void ExtensionManager::initPlugin(QObject *pluginObject)
     qDebug() << "plugin acquired " << (plugin!=NULL);
     if (plugin) {
         QString id = plugin->id();
-        bool initialState = isPluginEnabledBySetting(id);
-        ExtensionInfo *info = new ExtensionInfo(this, pluginObject, initialState);
-        this->idToExtension.insert(id,info);
-        qDebug() << "init plugin " << id;
-        extensions.append(info);
-        if (initialState) {
-            activatePlugin(info);
+        if (!this->idToExtension.contains(id)) {
+            bool initialState = isPluginEnabledBySetting(id);
+            ExtensionInfo *info = new ExtensionInfo(this, pluginObject, initialState);
+            this->idToExtension.insert(id,info);
+            qDebug() << "init plugin " << id;
+            extensions.append(info);
+            if (initialState) {
+                activatePlugin(info);
+            }
+        } else {
+            qDebug() << "plugin with the same id already exists : " << id;
         }
     } else {
         qDebug() << "-> not an Arora extension";
