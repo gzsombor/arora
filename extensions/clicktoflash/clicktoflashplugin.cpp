@@ -42,6 +42,10 @@ ClickToFlashPlugin::ClickToFlashPlugin()
 {
 }
 
+ClickToFlashPlugin::~ClickToFlashPlugin()
+{
+}
+
 void ClickToFlashPlugin::load()
 {
     if (m_loaded)
@@ -141,4 +145,4 @@ void ClickToFlashPlugin::deactivate() {
 }
 
 
-Q_EXPORT_PLUGIN2(clicktoflash, ClickToFlashPlugin)
+Q_EXPORT_PLUGIN2(AroraExtension, ClickToFlashPlugin)

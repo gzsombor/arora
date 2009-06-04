@@ -1,14 +1,13 @@
+# common part
 TEMPLATE = lib
 CONFIG += plugin qt
 
-INCLUDEPATH += ../../src ../../pluginapi
-TARGET = $$qtLibraryTarget(arora_demoextension)
+QT += webkit network
+
+INCLUDEPATH += ../../src ../../pluginapi ../../src/utils
 DESTDIR = ../../plugins
-HEADERS += demoextension.h
-SOURCES += demoextension.cpp
 
 LIBS += -L../../plugins -larora_api
-
 
 !win32 {
     exists($$PWD/../../.git/HEAD) {
@@ -19,3 +18,10 @@ LIBS += -L../../plugins -larora_api
         OBJECTS_DIR = $$PWD/.obj
     }
 }
+
+# plugin specific ...
+TARGET = $$qtLibraryTarget(arora_demoextension)
+
+HEADERS += demoextension.h
+SOURCES += demoextension.cpp
+

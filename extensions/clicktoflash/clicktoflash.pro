@@ -1,10 +1,11 @@
+# common part
 TEMPLATE = lib
 CONFIG += plugin qt
 
 QT += webkit network
 
 INCLUDEPATH += ../../src ../../pluginapi ../../src/utils
-TARGET = $$qtLibraryTarget(arora_clicktoflash)
+
 DESTDIR = ../../plugins
 
 LIBS += -L../../plugins -larora_api
@@ -18,6 +19,9 @@ LIBS += -L../../plugins -larora_api
         OBJECTS_DIR = $$PWD/.obj
     }
 }
+
+# plugin specific
+TARGET = $$qtLibraryTarget(arora_clicktoflash)
 
 HEADERS += clicktoflash.h \
   clicktoflashplugin.h

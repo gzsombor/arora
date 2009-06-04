@@ -35,15 +35,16 @@
 #include "aroraapi.h"
 
 
-class ClickToFlashPlugin :  public QObject, AroraExtension , AroraWebPlugin
+class ClickToFlashPlugin :  public QObject, AroraExtension, AroraWebPlugin
 {
     Q_OBJECT
     Q_INTERFACES(AroraExtension)
-    //Q_INTERFACES(AroraWebPlugin)
+    Q_INTERFACES(AroraWebPlugin)
 
 
 public:
     ClickToFlashPlugin();
+    virtual ~ClickToFlashPlugin();
 
     // AroraWebPlugin methods
     virtual QWebPluginFactory::Plugin metaPlugin();
