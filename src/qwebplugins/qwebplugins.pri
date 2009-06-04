@@ -6,7 +6,6 @@ HEADERS += \
   webpluginfactory.h
 
 SOURCES += \
-  arorawebplugin.cpp \
   webpluginfactory.cpp
 
 #include(clicktoflash/clicktoflash.pri)

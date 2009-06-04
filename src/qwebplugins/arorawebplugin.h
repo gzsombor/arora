@@ -35,8 +35,6 @@ class AroraWebPlugin
 {
 
 public:
-    AroraWebPlugin();
-    virtual ~AroraWebPlugin();
 
     virtual QWebPluginFactory::Plugin metaPlugin() = 0;
     virtual QWidget *create(const QString &mimeType, const QUrl &url,
@@ -46,7 +44,6 @@ public:
 };
 
 Q_DECLARE_INTERFACE(AroraWebPlugin, "org.arora-browser.WebPlugin/1.0")
-
 
 #endif // ARORAWEBPLUGIN_H
 
