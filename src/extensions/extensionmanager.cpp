@@ -1,3 +1,22 @@
+/*
+* Copyright 2009 Zsombor Gegesy <gzsombor@gmail.com>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor,
+* Boston, MA 02110-1301 USA
+*/
+
 #include "extensionmanager.h"
 #include "qpluginloader.h"
 #include "qdir.h"
@@ -6,13 +25,13 @@
 
 ExtensionManager::ExtensionManager()
 {
-    this->api = new PluginApi();
+    this->m_api = new PluginApi();
     this->loadPlugins();
 }
 
 ExtensionManager::~ExtensionManager()
 {
-    foreach (AroraExtension *plugin, this->enabledExtensions) {
+    foreach (AroraExtension *plugin, this->m_enabledExtensions) {
         plugin->deactivate();
     }
 }
@@ -47,16 +66,16 @@ void ExtensionManager::loadPlugins()
 
 void ExtensionManager::initPlugin(QObject *pluginObject)
 {
-    AroraExtension *plugin =  qobject_cast<AroraExtension *>(pluginObject);
+    AroraExtension *plugin =  qobject_cast<AroraExtension*> (pluginObject);
     qDebug() << "plugin acquired " << (plugin!=NULL);
     if (plugin) {
         QString id = plugin->id();
-        if (!this->idToExtension.contains(id)) {
+        if (!this->m_idToExtension.contains(id)) {
             bool initialState = isPluginEnabledBySetting(id);
             ExtensionInfo *info = new ExtensionInfo(this, pluginObject, initialState);
-            this->idToExtension.insert(id,info);
+            this->m_idToExtension.insert(id,info);
             qDebug() << "init plugin " << id;
-            extensions.append(info);
+            this->m_extensions.append(info);
             if (initialState) {
                 activatePlugin(info);
             }
@@ -77,11 +96,11 @@ bool ExtensionManager::isPluginEnabledBySetting(const QString &id) const
 bool ExtensionManager::activatePlugin(ExtensionInfo *info)
 {
     AroraExtension *extension = info->extension();
-    if (extension->activate(this->api)) {
-        enabledExtensions.append(extension);
+    if (extension->activate(this->m_api)) {
+        this->m_enabledExtensions.append(extension);
         WindowExtension *windowPlugin = info->windowExtension();
         if (windowPlugin) {
-            enabledWindowExtensions.append(windowPlugin);
+            this->m_enabledWindowExtensions.append(windowPlugin);
         }
         emit pluginStateChanged(info);
         return true;
@@ -96,10 +115,10 @@ bool ExtensionManager::deactivatePlugin(ExtensionInfo *info)
 {
     WindowExtension *windowPlugin = info->windowExtension();
     if (windowPlugin) {
-        enabledWindowExtensions.removeOne(windowPlugin);
+        this->m_enabledWindowExtensions.removeOne(windowPlugin);
     }
     AroraExtension *extension = info->extension();
-    if (enabledExtensions.removeOne(extension)) {
+    if (this->m_enabledExtensions.removeOne(extension)) {
         extension->deactivate();
         emit pluginStateChanged(info);
         return true;
@@ -109,13 +128,13 @@ bool ExtensionManager::deactivatePlugin(ExtensionInfo *info)
 
 QList<QString> ExtensionManager::ids()
 {
-    return this->idToExtension.keys();
+    return this->m_idToExtension.keys();
 }
 
-QList<ExtensionInfo *> ExtensionManager::enabledExtensionInfo()
+QList<ExtensionInfo*> ExtensionManager::enabledExtensionInfo()
 {
-    QList<ExtensionInfo *> result;
-    foreach(ExtensionInfo *info, this->extensions) {
+    QList<ExtensionInfo*> result;
+    foreach (ExtensionInfo *info, this->m_extensions) {
         if (info->isEnabled()) {
             result.append(info);
         }
@@ -123,28 +142,28 @@ QList<ExtensionInfo *> ExtensionManager::enabledExtensionInfo()
     return result;
 }
 
-ExtensionInfo* ExtensionManager::plugin(const QString &id)
+ExtensionInfo *ExtensionManager::plugin(const QString &id)
 {
-    return idToExtension[id];
+    return m_idToExtension[id];
 }
 
 void ExtensionManager::newWindow(BrowserMainWindow *window, QMenu *extensionMenu)
 {
-    foreach(WindowExtension *plugin, this->enabledWindowExtensions) {
+    foreach (WindowExtension *plugin, this->m_enabledWindowExtensions) {
         plugin->newWindow(window, extensionMenu);
     }
 }
 
 void ExtensionManager::closeWindow(BrowserMainWindow *window)
 {
-    foreach(WindowExtension *plugin, this->enabledWindowExtensions) {
+    foreach (WindowExtension *plugin, this->m_enabledWindowExtensions) {
         plugin->closeWindow(window);
     }
 }
 
 void ExtensionManager::localize(BrowserMainWindow *window)
 {
-    foreach(WindowExtension *plugin, this->enabledWindowExtensions) {
+    foreach (WindowExtension *plugin, this->m_enabledWindowExtensions) {
         plugin->localize(window);
     }
 }

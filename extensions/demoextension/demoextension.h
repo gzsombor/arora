@@ -62,9 +62,9 @@ public:
 
 
 private:
-    PluginApi *api;
+    PluginApi *m_api;
     QHash<BrowserMainWindow*,WindowData*> m_windowDatas;
-    WindowData* getData(BrowserMainWindow* window);
+    WindowData *getData(BrowserMainWindow *window);
 };
 
 
@@ -73,7 +73,7 @@ class WindowData : public QObject
     Q_OBJECT
 
 public:
-    WindowData(PluginApi *api, BrowserMainWindow* window);
+    WindowData(PluginApi *api, BrowserMainWindow *window);
     ~WindowData();
 
     void setup(QMenu *extensionMenu);
@@ -87,9 +87,9 @@ private slots:
 private:
     QAction *m_toolsCookiesAction;
     QAction *m_toolsCookieExceptionAction;
-    QMenu *extensionMenu;
-    BrowserMainWindow *window;
-    PluginApi *api;
+    QMenu *m_extensionMenu;
+    BrowserMainWindow *m_window;
+    PluginApi *m_api;
 };
 
 

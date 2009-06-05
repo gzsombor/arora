@@ -24,12 +24,12 @@ const QString DemoExtension::name() const
 }
 
 bool DemoExtension::activate(PluginApi *api) {
-    this->api = api;
+    this->m_api = api;
     return true;
 }
 
 void DemoExtension::deactivate() {
-    foreach(WindowData* windowData, m_windowDatas) {
+    foreach (WindowData *windowData, m_windowDatas) {
         delete windowData;
     }
     m_windowDatas.clear();
@@ -37,7 +37,7 @@ void DemoExtension::deactivate() {
 
 void DemoExtension::newWindow(BrowserMainWindow *window, QMenu *extensionMenu)
 {
-    WindowData* wd = getData(window);
+    WindowData *wd = getData(window);
     wd->setup(extensionMenu);
 }
 
@@ -55,28 +55,28 @@ void DemoExtension::localize(BrowserMainWindow *window)
     wd->localize();
 }
 
-WindowData* DemoExtension::getData(BrowserMainWindow* window)
+WindowData *DemoExtension::getData(BrowserMainWindow *window)
 {
     WindowData *wd = this->m_windowDatas.value(window);
     if (wd == NULL) {
-        wd = new WindowData(this->api, window);
+        wd = new WindowData(this->m_api, window);
         this->m_windowDatas.insert(window, wd);
     }
     return wd;
 }
 
-WindowData::WindowData(PluginApi *api, BrowserMainWindow* window) : m_toolsCookiesAction(0), m_toolsCookieExceptionAction (0)
+WindowData::WindowData(PluginApi *api, BrowserMainWindow *window) : m_toolsCookiesAction(0), m_toolsCookieExceptionAction (0)
 {
-    this->api = api;
-    this->extensionMenu = 0;
-    this->window = window;
+    this->m_api = api;
+    this->m_extensionMenu = 0;
+    this->m_window = window;
 }
 
 WindowData::~WindowData()
 {
-    if (extensionMenu) {
-        this->extensionMenu->removeAction(this->m_toolsCookieExceptionAction);
-        this->extensionMenu->removeAction(this->m_toolsCookiesAction);
+    if (this->m_extensionMenu) {
+        this->m_extensionMenu->removeAction(this->m_toolsCookieExceptionAction);
+        this->m_extensionMenu->removeAction(this->m_toolsCookiesAction);
         delete this->m_toolsCookiesAction;
         delete this->m_toolsCookieExceptionAction;
     }
@@ -84,14 +84,14 @@ WindowData::~WindowData()
 
 void WindowData::setup(QMenu *extensionMenu)
 {
-    this->extensionMenu = extensionMenu;
-    this->m_toolsCookiesAction = new QAction(extensionMenu);
+    this->m_extensionMenu = extensionMenu;
+    this->m_toolsCookiesAction = new QAction(m_extensionMenu);
     QObject::connect(this->m_toolsCookiesAction, SIGNAL(triggered()), this, SLOT(showCookies()));
-    this->extensionMenu->addAction(this->m_toolsCookiesAction);
+    this->m_extensionMenu->addAction(this->m_toolsCookiesAction);
 
     this->m_toolsCookieExceptionAction = new QAction(extensionMenu);
     QObject::connect(this->m_toolsCookieExceptionAction, SIGNAL(triggered()), this, SLOT(showExceptions()));
-    this->extensionMenu->addAction(this->m_toolsCookieExceptionAction);
+    this->m_extensionMenu->addAction(this->m_toolsCookieExceptionAction);
 }
 
 void WindowData::localize()
@@ -102,12 +102,12 @@ void WindowData::localize()
 
 void WindowData::showCookies()
 {
-    this->api->showCookiesDialog(this->window);
+    this->m_api->showCookiesDialog(this->m_window);
 }
 
 void WindowData::showExceptions()
 {
-    this->api->showCookieExceptionsDialog(this->window);
+    this->m_api->showCookieExceptionsDialog(this->m_window);
 }
 
 Q_EXPORT_PLUGIN2(AroraExtension, DemoExtension)
