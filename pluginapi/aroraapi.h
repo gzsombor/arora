@@ -5,13 +5,14 @@
 
 #include "extensions/aroraextension.h"
 #include "extensions/windowextension.h"
+#include "extensions/networkextension.h"
 #include "qwebplugins/arorawebplugin.h"
 #include "pluginapi.h"
 #include "browsermainwindow.h"
 
-#include "qplugin.h"
-#include "qobject.h"
+#include <qmenu.h>
+#include <qobject.h>
+#include <qplugin.h>
 
-#include "qmenu.h"
 
 #endif // ARORAAPI_H

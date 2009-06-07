@@ -6,7 +6,8 @@ HEADERS += aroraextension.h \
     aroraapi.h \
     extensiondialog.h \
     extensioninfo.h \
-    windowextension.h
+    windowextension.h \
+    networkextension.h
 SOURCES += extensionmanager.cpp \
     extensiondialog.cpp \
     extensioninfo.cpp

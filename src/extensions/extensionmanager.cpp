@@ -102,6 +102,10 @@ bool ExtensionManager::activatePlugin(ExtensionInfo *info)
         if (windowPlugin) {
             this->m_enabledWindowExtensions.append(windowPlugin);
         }
+        NetworkExtension *networkPlugin = info->networkExtension();
+        if (networkPlugin) {
+            this->m_enabledNetworkExtensions.append(networkPlugin);
+        }
         emit pluginStateChanged(info);
         return true;
     }
@@ -116,6 +120,10 @@ bool ExtensionManager::deactivatePlugin(ExtensionInfo *info)
     WindowExtension *windowPlugin = info->windowExtension();
     if (windowPlugin) {
         this->m_enabledWindowExtensions.removeOne(windowPlugin);
+    }
+    NetworkExtension *networkPlugin = info->networkExtension();
+    if (networkPlugin) {
+        this->m_enabledNetworkExtensions.removeOne(networkPlugin);
     }
     AroraExtension *extension = info->extension();
     if (this->m_enabledExtensions.removeOne(extension)) {
@@ -167,3 +175,17 @@ void ExtensionManager::localize(BrowserMainWindow *window)
         plugin->localize(window);
     }
 }
+
+ QNetworkReply *ExtensionManager::handleRequest(QNetworkAccessManager::Operation op,
+                                         const QNetworkRequest &request,
+                                         QIODevice *outgoingData)
+ {
+    foreach (NetworkExtension *plugin, this->m_enabledNetworkExtensions) {
+        QNetworkReply *reply = plugin->handleRequest(op, request, outgoingData);
+        if (reply) {
+            return reply;
+        }
+    }
+    return 0;
+ }
+

@@ -26,6 +26,7 @@
 #include "extensioninfo.h"
 #include "aroraextension.h"
 #include "windowextension.h"
+#include "networkextension.h"
 
 class ExtensionManager : public QObject
 {
@@ -40,6 +41,10 @@ public:
     void closeWindow(BrowserMainWindow *window);
 
     void localize(BrowserMainWindow *window);
+
+    QNetworkReply *handleRequest(QNetworkAccessManager::Operation op,
+                                         const QNetworkRequest &request,
+                                         QIODevice *outgoingData = 0);
 
     QList<QString> ids();
 
@@ -64,6 +69,7 @@ private:
     QHash<QString,ExtensionInfo*> m_idToExtension;
     QList<AroraExtension*> m_enabledExtensions;
     QList<WindowExtension*> m_enabledWindowExtensions;
+    QList<NetworkExtension*> m_enabledNetworkExtensions;
 
 };
 

@@ -1,13 +1,13 @@
 #ifndef PLUGINAPI_H
 #define PLUGINAPI_H
 
-// Include this file from the plugins, this contains the necessary includes.
-
-#include "qobject.h"
-#include "qmenu.h"
-#include "qplugin.h"
-
 #include "browsermainwindow.h"
+
+#include <qobject.h>
+#include <qmenu.h>
+#include <qplugin.h>
+#include <qnetworkaccessmanager.h>
+
 
 #if defined(PLUGINAPI_LIBRARY)
  #  define PLUGINAPI_EXPORT Q_DECL_EXPORT
@@ -24,6 +24,8 @@ public:
 
     PLUGINAPI_EXPORT void showCookiesDialog(BrowserMainWindow *window);
     PLUGINAPI_EXPORT void showCookieExceptionsDialog(BrowserMainWindow *window);
+
+    PLUGINAPI_EXPORT QNetworkAccessManager *networkAccessManager();
 
 };
 

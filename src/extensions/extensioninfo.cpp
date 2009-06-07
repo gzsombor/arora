@@ -66,6 +66,11 @@ AroraWebPlugin *ExtensionInfo::webPlugin() const
     return qobject_cast<AroraWebPlugin*> (this->m_extensionObject);
 }
 
+NetworkExtension *ExtensionInfo::networkExtension() const
+{
+    return qobject_cast<NetworkExtension*> (this->m_extensionObject);
+}
+
 const QString ExtensionInfo::id() const
 {
     return this->extension()->id();

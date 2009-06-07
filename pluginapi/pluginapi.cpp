@@ -20,3 +20,8 @@ void PluginApi::showCookieExceptionsDialog(BrowserMainWindow *window)
     CookieExceptionsDialog *dialog = new CookieExceptionsDialog(BrowserApplication::cookieJar(), window);
     dialog->exec();
 }
+
+QNetworkAccessManager *PluginApi::networkAccessManager()
+{
+    return BrowserApplication::networkAccessManager();
+}

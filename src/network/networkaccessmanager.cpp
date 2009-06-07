@@ -74,6 +74,7 @@
 #include "fileaccesshandler.h"
 #include "networkproxyfactory.h"
 #include "networkdiskcache.h"
+#include "extensionmanager.h"
 #include "ui_passworddialog.h"
 #include "ui_proxy.h"
 
@@ -359,6 +360,13 @@ QNetworkReply *NetworkAccessManager::createRequest(QNetworkAccessManager::Operat
 #if QT_VERSION >= 0x040600
     req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
 #endif
+
+    reply = BrowserApplication::extensionManager()->handleRequest(op, req, outgoingData);
+    if (reply) {
+        emit requestCreated(op, req, reply);
+        return reply;
+    }
+
     if (!m_acceptLanguage.isEmpty())
         req.setRawHeader("Accept-Language", m_acceptLanguage);
 
