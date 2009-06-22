@@ -99,6 +99,7 @@ private slots:
     void stop();
     void tryAgain();
     void open();
+    void openLocation();
 
     void downloadReadyRead();
     void error(QNetworkReply::NetworkError code);

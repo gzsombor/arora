@@ -106,6 +106,7 @@ DownloadItem::DownloadItem(QNetworkReply *reply, bool requestFileName, QWidget *
     tryAgainButton->hide();
     connect(stopButton, SIGNAL(clicked()), this, SLOT(stop()));
     connect(openButton, SIGNAL(clicked()), this, SLOT(open()));
+    connect(openLocationButton, SIGNAL(clicked()), this, SLOT(openLocation()));
     connect(tryAgainButton, SIGNAL(clicked()), this, SLOT(tryAgain()));
 
     if (!requestFileName) {
@@ -126,6 +127,7 @@ void DownloadItem::init()
     m_finishedDownloading = false;
 
     openButton->setEnabled(false);
+    openLocationButton->setEnabled(false);
 
     // attach to the m_reply
     m_url = m_reply->url();
@@ -253,6 +255,13 @@ void DownloadItem::open()
 {
     QFileInfo info(m_output);
     QUrl url = QUrl::fromLocalFile(info.absoluteFilePath());
+    QDesktopServices::openUrl(url);
+}
+
+void DownloadItem::openLocation()
+{
+    QFileInfo info(m_output);
+    QUrl url = QUrl::fromLocalFile(info.absoluteDir().absolutePath());
     QDesktopServices::openUrl(url);
 }
 
@@ -442,6 +451,7 @@ void DownloadItem::finished()
     stopButton->setEnabled(false);
     stopButton->hide();
     openButton->setEnabled(true);
+    openLocationButton->setEnabled(true);
     m_output.close();
     updateInfoLabel();
     emit statusChanged();
