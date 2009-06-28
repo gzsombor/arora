@@ -1,6 +1,7 @@
 TEMPLATE = lib
 VERSION = 0.7
 CONFIG += qt
+QT += network
 INCLUDEPATH += ../src \
     ../src/utils \
     ../src/cookiejar \

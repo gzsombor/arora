@@ -3,6 +3,7 @@
 #include "browserapplication.h"
 #include "cookiedialog.h"
 #include "cookieexceptionsdialog.h"
+#include "networkaccessmanager.h"
 
 PluginApi::PluginApi()
 {
