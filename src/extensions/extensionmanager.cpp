@@ -18,6 +18,10 @@
 */
 
 #include "extensionmanager.h"
+
+#include "browserapplication.h"
+
+
 #include "qpluginloader.h"
 #include "qdir.h"
 #include "qapplication.h"
@@ -34,10 +38,18 @@ ExtensionManager::~ExtensionManager()
     foreach (AroraExtension *plugin, this->m_enabledExtensions) {
         plugin->deactivate();
     }
+    foreach (AroraWindowImpl *awi, this->m_windowWrappers.values()) {
+        delete awi;
+    }
 }
+
 
 void ExtensionManager::loadPlugins()
 {
+    foreach (BrowserMainWindow *window,BrowserApplication::instance()->mainWindows()) {
+        getOrCreate(window);
+    }
+
     foreach (QObject *plugin, QPluginLoader::staticInstances()) {
         initPlugin(plugin);
     }
@@ -87,6 +99,16 @@ void ExtensionManager::initPlugin(QObject *pluginObject)
     }
 }
 
+AroraWindowImpl *ExtensionManager::getOrCreate(BrowserMainWindow *window)
+{
+    if (m_windowWrappers[window]) {
+        return m_windowWrappers[window];
+    }
+    AroraWindowImpl *impl = new AroraWindowImpl(window);
+    m_windowWrappers.insert(window, impl);
+    return impl;
+}
+
 bool ExtensionManager::isPluginEnabledBySetting(const QString &id) const
 {
     // TODO : decide is this plugin is enabled, pretend yes
@@ -101,6 +123,11 @@ bool ExtensionManager::activatePlugin(ExtensionInfo *info)
         WindowExtension *windowPlugin = info->windowExtension();
         if (windowPlugin) {
             this->m_enabledWindowExtensions.append(windowPlugin);
+            foreach (BrowserMainWindow *window, BrowserApplication::instance()->mainWindows()) {
+                AroraWindow *awin =  getOrCreate(window);
+                windowPlugin->newWindow(awin);
+                windowPlugin->localize(awin);
+            }
         }
         NetworkExtension *networkPlugin = info->networkExtension();
         if (networkPlugin) {
@@ -119,6 +146,9 @@ bool ExtensionManager::deactivatePlugin(ExtensionInfo *info)
 {
     WindowExtension *windowPlugin = info->windowExtension();
     if (windowPlugin) {
+        foreach (BrowserMainWindow *window, BrowserApplication::instance()->mainWindows()) {
+            windowPlugin->closeWindow(getOrCreate(window));
+        }
         this->m_enabledWindowExtensions.removeOne(windowPlugin);
     }
     NetworkExtension *networkPlugin = info->networkExtension();
@@ -155,24 +185,30 @@ ExtensionInfo *ExtensionManager::plugin(const QString &id)
     return m_idToExtension[id];
 }
 
-void ExtensionManager::newWindow(BrowserMainWindow *window, QMenu *extensionMenu)
+void ExtensionManager::newWindow(BrowserMainWindow *window)
 {
+    AroraWindow *aw = getOrCreate(window);
+
     foreach (WindowExtension *plugin, this->m_enabledWindowExtensions) {
-        plugin->newWindow(window, extensionMenu);
+        plugin->newWindow(aw);
     }
 }
 
 void ExtensionManager::closeWindow(BrowserMainWindow *window)
 {
+    AroraWindow *aw = getOrCreate(window);
+
     foreach (WindowExtension *plugin, this->m_enabledWindowExtensions) {
-        plugin->closeWindow(window);
+        plugin->closeWindow(aw);
     }
 }
 
 void ExtensionManager::localize(BrowserMainWindow *window)
 {
+    AroraWindow *aw = getOrCreate(window);
+
     foreach (WindowExtension *plugin, this->m_enabledWindowExtensions) {
-        plugin->localize(window);
+        plugin->localize(aw);
     }
 }
 
@@ -188,4 +224,5 @@ void ExtensionManager::localize(BrowserMainWindow *window)
     }
     return 0;
  }
+
 

@@ -229,7 +229,7 @@ BrowserMainWindow::BrowserMainWindow(QWidget *parent, Qt::WindowFlags flags)
 #if defined(Q_WS_X11)
     setWindowRole(QLatin1String("browser"));
 #endif
-    BrowserApplication::extensionManager()->newWindow(this, m_toolsMenu);
+    BrowserApplication::extensionManager()->newWindow(this);
     retranslate();
 }
 
@@ -1474,6 +1474,11 @@ WebView *BrowserMainWindow::currentTab() const
     return m_tabWidget->currentWebView();
 }
 
+QToolBar *BrowserMainWindow::navigationToolbar() const
+{
+    return m_navigationBar;
+}
+
 ToolbarSearch *BrowserMainWindow::toolbarSearch() const
 {
     return m_toolbarSearch;
@@ -1606,4 +1611,9 @@ void BrowserMainWindow::showExtensionDialog()
 {
     ExtensionDialog *dialog = new ExtensionDialog(BrowserApplication::extensionManager(), this);
     dialog->exec();
+}
+
+QMenu *BrowserMainWindow::toolsMenu() const
+{
+    return m_toolsMenu;
 }

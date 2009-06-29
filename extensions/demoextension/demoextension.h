@@ -45,26 +45,26 @@ public:
     /**
       * this method called after a new application window is created.
       */
-    void newWindow(BrowserMainWindow *window, QMenu *extensionMenu);
+    void newWindow(AroraWindow *window);
 
     /**
       * this method called before a new application window is closed.
       */
-    void closeWindow(BrowserMainWindow *window);
+    void closeWindow(AroraWindow *window);
 
     /**
       * this method called when language is changed, or during the initialization phase
       * and strings should be (re)translated.
       */
-    void localize(BrowserMainWindow *window);
+    void localize(AroraWindow *window);
 
     void configure() {}
 
 
 private:
     PluginApi *m_api;
-    QHash<BrowserMainWindow*,WindowData*> m_windowDatas;
-    WindowData *getData(BrowserMainWindow *window);
+    QHash<AroraWindow*,WindowData*> m_windowDatas;
+    WindowData *getData(AroraWindow *window);
 };
 
 
@@ -73,7 +73,7 @@ class WindowData : public QObject
     Q_OBJECT
 
 public:
-    WindowData(PluginApi *api, BrowserMainWindow *window);
+    WindowData(PluginApi *api, AroraWindow *window);
     ~WindowData();
 
     void setup(QMenu *extensionMenu);
@@ -88,7 +88,7 @@ private:
     QAction *m_toolsCookiesAction;
     QAction *m_toolsCookieExceptionAction;
     QMenu *m_extensionMenu;
-    BrowserMainWindow *m_window;
+    AroraWindow *m_window;
     PluginApi *m_api;
 };
 

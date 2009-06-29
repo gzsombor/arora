@@ -22,10 +22,9 @@ class PLUGINAPI_EXPORT PluginApi : public QObject
 public:
     PLUGINAPI_EXPORT PluginApi();
 
-    PLUGINAPI_EXPORT void showCookiesDialog(BrowserMainWindow *window);
-    PLUGINAPI_EXPORT void showCookieExceptionsDialog(BrowserMainWindow *window);
-
     PLUGINAPI_EXPORT QNetworkAccessManager *networkAccessManager();
+
+    PLUGINAPI_EXPORT QList<BrowserMainWindow *> allBrowserWindows();
 
 };
 

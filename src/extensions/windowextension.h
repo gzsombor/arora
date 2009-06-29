@@ -20,9 +20,15 @@
 #ifndef WINDOWEXTENSION_H
 #define WINDOWEXTENSION_H
 
+#include "arorawindow.h"
 #include "aroraextension.h"
 #include "pluginapi.h"
 
+/**
+  * TODO: instead use of BrowserMainWindow, we should use a much simpler interface,
+  * to encapsulate window specific properties
+  * to avoid coupling of the plugin implementation into the browser class structure.
+  */
 class WindowExtension
 {
 
@@ -31,18 +37,18 @@ public:
     /**
       * this method called after a new application window is created.
       */
-    virtual void newWindow(BrowserMainWindow *window, QMenu *extensionMenu) = 0;
+    virtual void newWindow(AroraWindow *window) = 0;
 
     /**
       * this method called before a new application window is closed.
       */
-    virtual void closeWindow(BrowserMainWindow *window) = 0;
+    virtual void closeWindow(AroraWindow *window) = 0;
 
     /**
       * this method called when language is changed, or during the initialization phase
       * and strings should be (re)translated.
       */
-    virtual void localize(BrowserMainWindow *window) = 0;
+    virtual void localize(AroraWindow *window) = 0;
 
 };
 

@@ -20,13 +20,16 @@
 #ifndef EXTENSIONMANAGER_H
 #define EXTENSIONMANAGER_H
 
+#include "aroraextension.h"
+#include "arorawindowimpl.h"
+#include "extensioninfo.h"
+#include "networkextension.h"
+#include "windowextension.h"
+
 #include "qobject.h"
 #include "qlist.h"
 #include "qhash.h"
-#include "extensioninfo.h"
-#include "aroraextension.h"
-#include "windowextension.h"
-#include "networkextension.h"
+
 
 class ExtensionManager : public QObject
 {
@@ -36,7 +39,7 @@ public:
     ExtensionManager();
     ~ExtensionManager();
 
-    void newWindow(BrowserMainWindow *window, QMenu *extensionMenu);
+    void newWindow(BrowserMainWindow *window);
 
     void closeWindow(BrowserMainWindow *window);
 
@@ -62,14 +65,17 @@ private:
     void loadPlugins();
     void initPlugin(QObject *plugin);
     bool isPluginEnabledBySetting(const QString &id) const;
+    AroraWindowImpl *getOrCreate(BrowserMainWindow *window);
+
 
 
     PluginApi *m_api;
-    QList<ExtensionInfo*> m_extensions;
-    QHash<QString,ExtensionInfo*> m_idToExtension;
-    QList<AroraExtension*> m_enabledExtensions;
-    QList<WindowExtension*> m_enabledWindowExtensions;
-    QList<NetworkExtension*> m_enabledNetworkExtensions;
+    QList<ExtensionInfo *> m_extensions;
+    QHash<QString,ExtensionInfo *> m_idToExtension;
+    QList<AroraExtension *> m_enabledExtensions;
+    QList<WindowExtension *> m_enabledWindowExtensions;
+    QList<NetworkExtension *> m_enabledNetworkExtensions;
+    QHash<BrowserMainWindow*,AroraWindowImpl *> m_windowWrappers;
 
 };
 

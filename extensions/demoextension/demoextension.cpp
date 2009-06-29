@@ -1,7 +1,7 @@
 #include "demoextension.h"
 
 #include "qaction.h"
-
+#include "qmenu.h"
 
 
 DemoExtension::DemoExtension()
@@ -35,13 +35,16 @@ void DemoExtension::deactivate() {
     m_windowDatas.clear();
 }
 
-void DemoExtension::newWindow(BrowserMainWindow *window, QMenu *extensionMenu)
+void DemoExtension::newWindow(AroraWindow *window)
 {
-    WindowData *wd = getData(window);
-    wd->setup(extensionMenu);
+    QMenu *extensionMenu = window->toolsMenu();
+    if (extensionMenu) {
+        WindowData *wd = getData(window);
+        wd->setup(extensionMenu);
+    }
 }
 
-void DemoExtension::closeWindow(BrowserMainWindow *window)
+void DemoExtension::closeWindow(AroraWindow *window)
 {
     WindowData *wd = this->m_windowDatas.take(window);
     if (wd) {
@@ -49,13 +52,13 @@ void DemoExtension::closeWindow(BrowserMainWindow *window)
     }
 }
 
-void DemoExtension::localize(BrowserMainWindow *window)
+void DemoExtension::localize(AroraWindow *window)
 {
     WindowData *wd = getData(window);
     wd->localize();
 }
 
-WindowData *DemoExtension::getData(BrowserMainWindow *window)
+WindowData *DemoExtension::getData(AroraWindow *window)
 {
     WindowData *wd = this->m_windowDatas.value(window);
     if (wd == NULL) {
@@ -65,7 +68,7 @@ WindowData *DemoExtension::getData(BrowserMainWindow *window)
     return wd;
 }
 
-WindowData::WindowData(PluginApi *api, BrowserMainWindow *window) : m_toolsCookiesAction(0), m_toolsCookieExceptionAction (0)
+WindowData::WindowData(PluginApi *api, AroraWindow *window) : m_toolsCookiesAction(0), m_toolsCookieExceptionAction (0)
 {
     this->m_api = api;
     this->m_extensionMenu = 0;
@@ -102,12 +105,12 @@ void WindowData::localize()
 
 void WindowData::showCookies()
 {
-    this->m_api->showCookiesDialog(this->m_window);
+    this->m_window->showCookiesDialog();
 }
 
 void WindowData::showExceptions()
 {
-    this->m_api->showCookieExceptionsDialog(this->m_window);
+    this->m_window->showCookieExceptionsDialog();
 }
 
 Q_EXPORT_PLUGIN2(AroraExtension, DemoExtension)
