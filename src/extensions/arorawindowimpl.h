@@ -14,10 +14,22 @@ public:
     void showCookiesDialog();
     void showCookieExceptionsDialog();
     QMenu *toolsMenu();
+    QToolBar *navigationToolbar();
+    WebView *currentTab();
+    TabWidget *tabWidget();
+
+
+    QAction *action(ActionTypes actionType);
+
+    QObject *get(QString &name);
+
+    QObject *remove(QString &name);
+
+    void set(QString &name,QObject *object);
 
 private:
     BrowserMainWindow *m_window;
-
+    QHash<QString,QObject *> m_properties;
 };
 
 #endif // ARORAWINDOWIMPL_H

@@ -453,6 +453,26 @@ QAction *BrowserMainWindow::showMenuBarAction() const
     return m_viewShowMenuBarAction;
 }
 
+QAction *BrowserMainWindow::actionReload() const
+{
+    return m_stopReloadAction;
+}
+
+QAction *BrowserMainWindow::actionBack() const
+{
+    return m_historyBackAction;
+}
+
+QAction *BrowserMainWindow::actionForward() const
+{
+    return m_historyHomeAction;
+}
+
+QAction *BrowserMainWindow::actionHome() const
+{
+    return m_historyHomeAction;
+}
+
 void BrowserMainWindow::setupMenu()
 {
     m_menuBarVisible = true;

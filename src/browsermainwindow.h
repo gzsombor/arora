@@ -100,9 +100,14 @@ public:
     QByteArray saveState(bool withTabs = true) const;
     bool restoreState(const QByteArray &state);
     QAction *showMenuBarAction() const;
+    QAction *actionReload() const;
+    QAction *actionBack() const;
+    QAction *actionForward() const;
+    QAction *actionHome() const;
     QToolBar *navigationToolbar() const;
     QAction *searchManagerAction() const { return m_toolsSearchManagerAction; }
     QMenu *toolsMenu() const;
+
 
 public slots:
     void goHome();
