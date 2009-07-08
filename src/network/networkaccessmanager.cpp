@@ -63,6 +63,7 @@
 #include "networkaccessmanager.h"
 
 #include "acceptlanguagedialog.h"
+#include "blockednetworkreply.h"
 #include "browserapplication.h"
 #include "browsermainwindow.h"
 #include "cookiejar.h"
@@ -70,6 +71,7 @@
 #include "fileaccesshandler.h"
 #include "networkproxyfactory.h"
 #include "networkdiskcache.h"
+#include "networkaccesspolicy.h"
 #include "ui_passworddialog.h"
 #include "ui_proxy.h"
 
@@ -86,6 +88,7 @@
 
 NetworkAccessManager::NetworkAccessManager(QObject *parent)
     : QNetworkAccessManager(parent)
+    , m_accessPolicy(0)
 {
     connect(this, SIGNAL(authenticationRequired(QNetworkReply*, QAuthenticator*)),
             SLOT(authenticationRequired(QNetworkReply*, QAuthenticator*)));
@@ -121,6 +124,22 @@ void NetworkAccessManager::privacyChanged(bool isPrivate)
 void NetworkAccessManager::setSchemeHandler(const QString &scheme, SchemeAccessHandler *handler)
 {
     m_schemeHandlers.insert(scheme, handler);
+}
+
+void NetworkAccessManager::setAccessPolicy(NetworkAccessPolicy *policy)
+{
+    if (m_accessPolicy)
+        delete m_accessPolicy;
+
+    if (policy)
+        policy->setParent(this);
+
+    m_accessPolicy = policy;
+}
+
+NetworkAccessPolicy *NetworkAccessManager::accessPolicy() const
+{
+    return m_accessPolicy;
 }
 
 void NetworkAccessManager::loadSettings()
@@ -342,7 +361,11 @@ QNetworkReply *NetworkAccessManager::createRequest(QNetworkAccessManager::Operat
     if (!m_acceptLanguage.isEmpty())
         req.setRawHeader("Accept-Language", m_acceptLanguage);
 
-    reply = QNetworkAccessManager::createRequest(op, req, outgoingData);
+    if (m_accessPolicy->allowedToConnect(req)) {
+        reply = QNetworkAccessManager::createRequest(op, req, outgoingData);
+    } else {
+        reply = new BlockedNetworkReply(op, req);
+    }
     emit requestCreated(op, req, reply);
     return reply;
 }

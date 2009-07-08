@@ -70,6 +70,7 @@
 #include "cookiejar.h"
 #include "historymanager.h"
 #include "networkaccessmanager.h"
+#include "networkaccesspolicy.h"
 #include "tabwidget.h"
 #include "webpluginfactory.h"
 #include "webpage.h"
@@ -247,6 +248,8 @@ void SettingsDialog::loadFromSettings()
     openTargetBlankLinksIn->setCurrentIndex(settings.value(QLatin1String("openTargetBlankLinksIn"), TabWidget::NewSelectedTab).toInt());
     openLinksFromAppsIn->setCurrentIndex(settings.value(QLatin1String("openLinksFromAppsIn"), TabWidget::NewSelectedTab).toInt());
     settings.endGroup();
+
+    enableAdBlock->setChecked(BrowserApplication::networkAccessManager()->accessPolicy()->isEnabled());
 }
 
 void SettingsDialog::saveToSettings()
@@ -362,6 +365,9 @@ void SettingsDialog::saveToSettings()
     settings.setValue(QLatin1String("openTargetBlankLinksIn"), openTargetBlankLinksIn->currentIndex());
     settings.setValue(QLatin1String("openLinksFromAppsIn"), openLinksFromAppsIn->currentIndex());
     settings.endGroup();
+
+    BrowserApplication::networkAccessManager()->accessPolicy()->setEnabled(enableAdBlock->isChecked());
+    BrowserApplication::networkAccessManager()->accessPolicy()->save();
 
     BrowserApplication::instance()->loadSettings();
     BrowserApplication::networkAccessManager()->loadSettings();

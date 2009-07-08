@@ -78,6 +78,7 @@
 #include "history.h"
 #include "languagemanager.h"
 #include "networkaccessmanager.h"
+#include "ruleeditor.h"
 #include "settings.h"
 #include "sourceviewer.h"
 #include "tabbar.h"
@@ -755,6 +756,10 @@ void BrowserMainWindow::setupMenu()
     m_toolsEnableInspector->setChecked(settings.value(QLatin1String("enableInspector"), false).toBool());
     m_toolsMenu->addAction(m_toolsEnableInspector);
 
+    m_adblockConfigAction = new QAction(m_toolsMenu);
+    connect(m_adblockConfigAction, SIGNAL(triggered()), this, SLOT(showAdblockConfig()));
+    m_toolsMenu->addAction(m_adblockConfigAction);
+
     // Help
     m_helpMenu = new QMenu(menuBar());
     menuBar()->addMenu(m_helpMenu);
@@ -897,6 +902,7 @@ void BrowserMainWindow::retranslate()
     m_toolsClearPrivateDataAction->setText(tr("&Clear Private Data"));
     m_toolsClearPrivateDataAction->setShortcut(QKeySequence(tr("Ctrl+Shift+Delete", "Clear Private Data")));
     m_toolsEnableInspector->setText(tr("Enable Web &Inspector"));
+    m_adblockConfigAction->setText(tr("&Ad blocker"));
 
     m_helpMenu->setTitle(tr("&Help"));
     m_helpChangeLanguageAction->setText(tr("Switch application language "));
@@ -1459,3 +1465,9 @@ void BrowserMainWindow::geometryChangeRequested(const QRect &geometry)
     setGeometry(geometry);
 }
 
+void BrowserMainWindow::showAdblockConfig()
+{
+    RuleEditor *editor = new RuleEditor(BrowserApplication::networkAccessManager()->accessPolicy(), this);
+    editor->setAttribute(Qt::WA_DeleteOnClose);
+    editor->show();
+}

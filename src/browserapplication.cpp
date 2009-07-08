@@ -70,6 +70,7 @@
 #include "historymanager.h"
 #include "languagemanager.h"
 #include "networkaccessmanager.h"
+#include "networkaccesspolicy.h"
 #include "tabwidget.h"
 #include "webview.h"
 
@@ -524,8 +525,10 @@ DownloadManager *BrowserApplication::downloadManager()
 
 NetworkAccessManager *BrowserApplication::networkAccessManager()
 {
-    if (!s_networkAccessManager)
+    if (!s_networkAccessManager) {
         s_networkAccessManager = new NetworkAccessManager();
+        s_networkAccessManager->setAccessPolicy(new NetworkAccessPolicy);
+    }
     return s_networkAccessManager;
 }
 
