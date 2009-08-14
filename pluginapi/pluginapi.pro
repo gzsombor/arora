@@ -4,7 +4,8 @@ CONFIG += qt
 QT += network
 INCLUDEPATH += ../src \
     ../src/utils \
-    ../src/cookiejar \
+    ../src/network \
+    ../src/network/cookiejar \
     ../src/.ui
 TARGET = $$qtLibraryTarget(arora_api)
 DESTDIR = ../plugins
