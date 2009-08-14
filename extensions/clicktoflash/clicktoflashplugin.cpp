@@ -70,9 +70,8 @@ QWidget *ClickToFlashPlugin::create(const QString &mimeType, const QUrl &url,
                                     const QStringList &argumentNames, const QStringList &argumentValues)
 {
     load();
-    // TODO: remove it
-//    if (!m_enabled)
-//        return 0;
+    if (!m_enabled)
+        return 0;
     Q_UNUSED(mimeType);
     if (m_whitelist.contains(url.host()))
         return 0;
@@ -106,6 +105,11 @@ void ClickToFlashPlugin::configure()
         m_whitelist = model->stringList();
         save();
     }
+}
+
+bool ClickToFlashPlugin::isAnonymous() const
+{
+    return true;
 }
 
 bool ClickToFlashPlugin::onWhitelist(const QString &host) const

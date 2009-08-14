@@ -77,6 +77,7 @@ public:
 
     virtual void configure();
 
+    bool isAnonymous() const;
     bool onWhitelist(const QString &host) const;
     void addToWhitelist(const QString &host);
     void removeFromWhitelist(const QString &host);
