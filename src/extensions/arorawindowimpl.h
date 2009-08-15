@@ -21,11 +21,11 @@ public:
 
     QAction *action(ActionTypes actionType);
 
-    QObject *get(QString &name);
+    QObject *get(QString name);
 
-    QObject *remove(QString &name);
+    QObject *remove(QString name);
 
-    void set(QString &name,QObject *object);
+    void set(QString name,QObject *object);
 
 private:
     BrowserMainWindow *m_window;

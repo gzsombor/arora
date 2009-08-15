@@ -53,19 +53,19 @@ QAction *AroraWindowImpl::action(ActionTypes actionType)
     return 0;
 }
 
-QObject *AroraWindowImpl::get(QString &name)
+QObject *AroraWindowImpl::get(QString name)
 {
     return m_properties[name];
 }
 
-QObject *AroraWindowImpl::remove(QString &name)
+QObject *AroraWindowImpl::remove(QString name)
 {
     QObject *obj = m_properties.value(name);
     m_properties.remove(name);
     return obj;
 }
 
-void AroraWindowImpl::set(QString &name,QObject *object)
+void AroraWindowImpl::set(QString name,QObject *object)
 {
     m_properties.insert(name, object);
 }

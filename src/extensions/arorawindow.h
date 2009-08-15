@@ -30,11 +30,11 @@ public:
 
     virtual QAction *action(ActionTypes actionType) = 0;
 
-    virtual QObject *get(QString &name) = 0;
+    virtual QObject *get(QString name) = 0;
 
-    virtual QObject *remove(QString &name) = 0;
+    virtual QObject *remove(QString name) = 0;
 
-    virtual void set(QString &name,QObject *object) = 0;
+    virtual void set(QString name,QObject *object) = 0;
 };
 
 #endif // ARORAWINDOW_H
