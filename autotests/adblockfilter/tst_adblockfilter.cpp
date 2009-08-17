@@ -18,7 +18,11 @@
  */
 
 #include <QtTest/QtTest>
-#include <adblockfilter.h>
+
+#include <qbuffer.h>
+
+#include <urlaccessrule.h>
+#include <networkaccesspolicy.h>
 
 class tst_AdBlockFilter : public QObject
 {
@@ -36,12 +40,30 @@ private slots:
 };
 
 // Subclass that exposes the protected functions.
-class SubAdBlockFilter : public AdBlockFilter
+class SubAdBlockFilter
 {
 public:
-    SubAdBlockFilter(const QString &filter)
-       : AdBlockFilter(filter) {}
+    SubAdBlockFilter(const QString &filter);
+    bool match(const QUrl &url);
+    UrlAccessRule *rule;
 };
+
+SubAdBlockFilter::SubAdBlockFilter(const QString &filter)
+    : rule(0)
+{
+    QList<UrlAccessRule*> rules;
+    QString dummy = "dummy";
+    QBuffer buffer(&filter.toUtf8());
+    bool ok = NetworkAccessPolicy::importAdBlockRules(buffer,  rules, dummy);
+    rule = rules.value(0);
+}
+
+bool SubAdBlockFilter::match(const QUrl &url)
+{
+    if (!rule)
+        return false;
+    return rule->match(url.toString());
+}
 
 // This will be called before the first test function is executed.
 // It is only called once.

@@ -3,7 +3,6 @@ DEPENDPATH += $$PWD
 
 HEADERS += \
     adblocksubscription.h \
-    adblockfilter.h \
     blockednetworkreply.h \
     networkaccesspolicy.h \
     urlaccessrule.h \
@@ -16,7 +15,6 @@ HEADERS += \
 
 SOURCES += \
     adblocksubscription.cpp \
-#    adblockfilter.cpp \
     blockednetworkreply.cpp \
     networkaccesspolicy.cpp \
     urlaccessrule.cpp \

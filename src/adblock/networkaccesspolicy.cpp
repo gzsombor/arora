@@ -148,7 +148,7 @@ bool NetworkAccessPolicy::importAdBlockRules(QTextStream &txt,  QList<UrlAccessR
     QString line;
     rules.clear();
     do {
-        line = txt.readLine(1024);
+        line = txt.readLine();
         if (!line.startsWith(QLatin1String("!")) && !line.contains(QLatin1Char('#'))) {
             bool exception = false;
 
