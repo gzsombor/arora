@@ -98,7 +98,7 @@ include(network/network.pri)
 include(opensearch/opensearch.pri)
 include(qwebplugins/qwebplugins.pri)
 include(utils/utils.pri)
-include(networkaccess/networkaccess.pri)
+include(adblock/adblock.pri)
 
 RESOURCES += \
     $$PWD/data/data.qrc \

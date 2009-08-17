@@ -53,21 +53,21 @@ void SubscriptionEditor::selectionChanged(const QModelIndex &current, const QMod
     if (current.row() < 0 || m_model->rowCount() <= current.row())
         return;
 
-    FilterSubscription *filterSubs = m_model->at(current.row());
+    AdBlockSubscription *filterSubs = m_model->at(current.row());
     nameField->setText(filterSubs->name());
-    urlField->setText(filterSubs->url());
-    dateEdit->setDate(filterSubs->lastFetchDate());
+    urlField->setText(QString::fromUtf8(filterSubs->url().toEncoded()));
+    dateEdit->setDate(filterSubs->lastFetchedDate());
     enableCheckBox->setChecked(filterSubs->isEnabled());
 }
 
 void SubscriptionEditor::on_fetchButton_clicked()
 {
 #if defined(NETWORKACCESS_DEBUG)
-    qDebug("fetch button clicked");
+    qDebug() << __FUNCTION__;
 #endif
     QModelIndexList selected = tableView->selectionModel()->selectedRows();
     foreach (const QModelIndex &index, selected) {
-        FilterSubscription *filterSubs = m_model->at(index.row());
+        AdBlockSubscription *filterSubs = m_model->at(index.row());
         new SubscriptionDownload(m_accessPolicy, filterSubs, m_model, index);
     }
 }
@@ -76,7 +76,7 @@ void SubscriptionEditor::enableCheckBoxChanged()
 {
     QModelIndexList indexList = tableView->selectionModel()->selectedRows();
     foreach (const QModelIndex &index, indexList) {
-        FilterSubscription *filterSubs = m_model->at(index.row());
+        AdBlockSubscription *filterSubs = m_model->at(index.row());
         filterSubs->setEnabled(enableCheckBox->isChecked());
         emit m_model->emitDataChanged(index);
     }

@@ -32,7 +32,7 @@ FilterSelector::FilterSelector(bool exceptionRules, QObject *parent)
 {
 }
 
-const UrlAccessRule *FilterSelector::get(QString url) const
+const UrlAccessRule *FilterSelector::get(const QString &url) const
 {
     for (int i = 0; i < url.length() - HASH_LEN; ++i) {
         QString substr = url.mid(i, HASH_LEN);

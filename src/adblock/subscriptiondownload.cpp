@@ -30,7 +30,7 @@
 #include <qdebug.h>
 #endif
 
-SubscriptionDownload::SubscriptionDownload(NetworkAccessPolicy *policy, FilterSubscription *destination,
+SubscriptionDownload::SubscriptionDownload(NetworkAccessPolicy *policy, AdBlockSubscription *destination,
                                            SubscriptionTableModel *tableModel, const QModelIndex &index)
     : m_index(index)
 {
@@ -63,7 +63,7 @@ void SubscriptionDownload::downloadFinished()
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("AdBlock Rule Subscriptions"));
         msgBox.setText(tr("Rules loaded"));
-        msgBox.setInformativeText(tr("%1 rule loaded from %2").arg(QString::number(rules.size()),m_destination->url()));
+        msgBox.setInformativeText(tr("%1 rule loaded from %2").arg(QString::number(rules.size()),m_destination->url().toString()));
         msgBox.setIcon(QMessageBox::Information);
         msgBox.exec();
 #if defined(NETWORKACCESS_DEBUG)
@@ -78,7 +78,7 @@ void SubscriptionDownload::downloadFinished()
     }
 
     QDate now = QDate::currentDate();
-    m_destination->setLastFetchDate(now);
+    m_destination->setLastFetchedDate(now);
     m_tableModel->emitDataChanged(m_index);
     deleteLater();
 }

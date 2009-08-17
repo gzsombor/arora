@@ -1,5 +1,6 @@
 /*
  * Copyright 2009 Zsombor Gegesy <gzsombor@gmail.com>
+ * Copyright 2009 Benjamin Meyer <ben@meyerhome.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +32,7 @@
 #include <qtextstream.h>
 
 // define NETWORKACCESS_DEBUG
-
+class AdBlockSubscription;
 class NetworkAccessPolicy : public QObject
 {
     Q_OBJECT
@@ -50,8 +51,8 @@ public:
     const QList<UrlAccessRule*> *accessRules() const;
     void setAccessRules(QList<UrlAccessRule*> &newRules);
 
-    void setAccessRules(FilterSubscription *subscription, QList<UrlAccessRule*> &newRules);
-    QList<FilterSubscription*> &subscriptions() { return m_subscriptions; }
+    void setAccessRules(AdBlockSubscription *subscription, QList<UrlAccessRule*> &newRules);
+    QList<AdBlockSubscription*> &subscriptions() { return m_subscriptions; }
 
     void setEnabled(bool flag) { m_enabled = flag; }
 
@@ -67,7 +68,7 @@ private:
     FilterSelector m_acceptRules;
     FilterSelector m_blockRules;
     QList<UrlAccessRule*> *m_rules;
-    QList<FilterSubscription*> m_subscriptions;
+    QList<AdBlockSubscription*> m_subscriptions;
     bool m_enabled;
 #if defined(NETWORKACCESS_DEBUG)
     int m_elapsedTime;

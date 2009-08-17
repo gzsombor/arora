@@ -17,34 +17,34 @@
  * Boston, MA  02110-1301  USA
  */
 
-#ifndef FILTERSUBSCRIPTION_H
-#define FILTERSUBSCRIPTION_H
+#ifndef FILTERSELECTOR_H
+#define FILTERSELECTOR_H
 
-#include <qdatetime.h>
+#include "urlaccessrule.h"
+
+#include <qhash.h>
+#include <qlist.h>
 #include <qobject.h>
-#include <qstring.h>
 
-class FilterSubscription
+class FilterSelector : public QObject
 {
+    Q_OBJECT
 
 public:
-    FilterSubscription(int index, const QString &name, const QString &source, const QDate &lastFetch, bool enabled);
+    FilterSelector(bool exceptionRules, QObject *parent = 0);
 
-    QString name() const;
-    QString url() const;
-    QDate lastFetchDate() const;
-    bool isEnabled() const;
-    int index() const;
+    const UrlAccessRule *get(const QString &url) const;
 
-    void setEnabled(bool enabled);
-    void setLastFetchDate(const QDate &date);
+    void setRules(QList<UrlAccessRule*> *rules);
+
+public slots:
+    void rehash();
 
 private:
-    int m_index;
-    QString m_name;
-    QString m_sourceUrl;
-    QDate m_lastFetchDate;
-    bool m_enabled;
+    bool m_exceptionRules;
+    QList<UrlAccessRule*> *m_allRules;
+    QHash<QString,UrlAccessRule*> m_ruleHash;
+    QList<UrlAccessRule*> m_extraRules;
 };
 
-#endif // FILTERSUBSCRIPTION_H
+#endif // FILTERSELECTOR_H

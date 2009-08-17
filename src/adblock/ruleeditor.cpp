@@ -76,7 +76,7 @@ UrlAccessRule *RuleEditor::createRule(bool newRule)
     qDebug() << "set rule " << ruleEdit->text() << " enabled " << enabledCheckBox->isChecked();
 #endif
     return new UrlAccessRule(!regExpCheckBox->isChecked(), ruleEdit->text(),
-            exclusionCheckBox->isChecked(), 0, enabledCheckBox->isChecked(), newRule ? 0 : m_currentFilterSubscription);
+            exclusionCheckBox->isChecked(), 0, enabledCheckBox->isChecked(), newRule ? 0 : m_currentSubscription);
 }
 
 void RuleEditor::modifyRule()
@@ -116,7 +116,7 @@ void RuleEditor::selectionChanged(const QModelIndex &current, const QModelIndex 
     qDebug() << "rule " << rule->pattern() << " enabled " << rule->isEnabled() << " editable " << rule->isEditable();
 
 #endif
-    m_currentFilterSubscription = rule->filterSubscription();
+    m_currentSubscription = rule->subscription();
     ruleEdit->setText(rule->pattern());
     exclusionCheckBox->setChecked(rule->isExceptionRule());
     regExpCheckBox->setChecked(rule->isRegexpRule());

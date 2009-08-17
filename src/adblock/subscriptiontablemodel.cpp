@@ -23,7 +23,7 @@
 #include <qdebug.h>
 #endif
 
-SubscriptionTableModel::SubscriptionTableModel(QList<FilterSubscription*> &subscription)
+SubscriptionTableModel::SubscriptionTableModel(QList<AdBlockSubscription*> &subscription)
     : m_subscriptions(subscription)
 {
 }
@@ -59,7 +59,7 @@ QVariant SubscriptionTableModel::data(const QModelIndex &index, int role) const
         case 0:
             return QVariant(m_subscriptions.at(row)->name());
         case 1:
-            return QVariant(m_subscriptions.at(row)->lastFetchDate());
+            return QVariant(m_subscriptions.at(row)->lastFetchedDate());
         case 2:
             return QVariant(m_subscriptions.at(row)->isEnabled() ? tr("Enabled") : tr("Disabled"));
         }
@@ -80,7 +80,7 @@ int SubscriptionTableModel::rowCount(const QModelIndex &parent) const
     return m_subscriptions.size();
 }
 
-FilterSubscription *SubscriptionTableModel::at(int index) const
+AdBlockSubscription *SubscriptionTableModel::at(int index) const
 {
     return m_subscriptions.at(index);
 }

@@ -20,26 +20,26 @@
 #ifndef SUBSCRIPTIONTABLEMODEL_H
 #define SUBSCRIPTIONTABLEMODEL_H
 
-#include "filtersubscription.h"
+#include "adblocksubscription.h"
 
 #include <qabstractitemmodel.h>
 
 class SubscriptionTableModel : public QAbstractTableModel
 {
 public:
-    SubscriptionTableModel(QList<FilterSubscription*> &subscription);
+    SubscriptionTableModel(QList<AdBlockSubscription*> &subscription);
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
-    FilterSubscription *at(int index) const;
+    AdBlockSubscription *at(int index) const;
 
     void emitDataChanged(const QModelIndex &row);
 
 private:
-    QList<FilterSubscription*> &m_subscriptions;
+    QList<AdBlockSubscription*> &m_subscriptions;
 };
 
 #endif // SUBSCRIPTIONTABLEMODEL_H

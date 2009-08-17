@@ -17,35 +17,41 @@
  * Boston, MA  02110-1301  USA
  */
 
-#ifndef SUBSCRIPTIONDOWNLOAD_H
-#define SUBSCRIPTIONDOWNLOAD_H
+#ifndef RULEEDITOR_H
+#define RULEEDITOR_H
 
-#include "filtersubscription.h"
-#include "networkaccesspolicy.h"
-#include "subscriptiontablemodel.h"
+#include <qdialog.h>
+#include "ui_ruleeditor.h"
 
-#include <qobject.h>
-#include <qnetworkreply.h>
+#include "ruletablemodel.h"
 
-class SubscriptionDownload : public QObject
+class RuleEditor: public QDialog, public Ui_RuleEditor
 {
     Q_OBJECT
-    Q_DISABLE_COPY(SubscriptionDownload)
 
 public:
-    explicit SubscriptionDownload(NetworkAccessPolicy *policy, FilterSubscription *destination,
-                                  SubscriptionTableModel *tableModel, const QModelIndex &index);
-    ~SubscriptionDownload();
+    RuleEditor(NetworkAccessPolicy *datas, QWidget *parent = 0);
+
+protected:
+    void save();
 
 protected slots:
-    void downloadFinished();
+    void addRule();
+    void modifyRule();
+    void deleteRule();
+    void accept();
+    void selectionChanged(const QModelIndex &current, const QModelIndex &prev);
+    void importRules();
+    void viewSubscriptions();
+    void setAdblockEnabled(bool flag);
 
 private:
-    FilterSubscription *m_destination;
-    NetworkAccessPolicy *m_policy;
-    SubscriptionTableModel *m_tableModel;
-    QModelIndex m_index;
-    QNetworkReply *m_reply;
+    RuleTableModel *m_tableModel;
+    NetworkAccessPolicy *m_accessPolicy;
+    AdBlockSubscription *m_currentSubscription;
+
+    UrlAccessRule *createRule(bool newRule);
+    void enableButtons(bool flag);
 };
 
-#endif // SUBSCRIPTIONDOWNLOAD_H
+#endif // RULEEDITOR_H

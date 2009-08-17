@@ -19,11 +19,13 @@
 
 #include "urlaccessrule.h"
 
+#include "adblocksubscription.h"
+
 UrlAccessRule::UrlAccessRule(bool wildcard, const QString &pattern, bool exception, int hitCount, bool enabled,
-                             FilterSubscription *filterSubscription, QObject *parent)
+                             AdBlockSubscription *AdBlockSubscription, QObject *parent)
     : QObject(parent),m_pattern(pattern),m_enabled(enabled),m_hash(0)
 {
-    m_subscription = filterSubscription;
+    m_subscription = AdBlockSubscription;
     m_exceptionRule = exception;
 
     if (wildcard) {
@@ -56,7 +58,7 @@ UrlAccessRule::~UrlAccessRule()
     delete m_regexp;
 }
 
-Decision UrlAccessRule::decide(const QUrl &url) const
+UrlAccessRule::Decision UrlAccessRule::decide(const QUrl &url) const
 {
     if (!m_enabled)
         return Undecided;
@@ -126,12 +128,12 @@ void UrlAccessRule::incrementHitCount()
     ++m_hitCount;
 }
 
-FilterSubscription *UrlAccessRule::filterSubscription() const
+AdBlockSubscription *UrlAccessRule::subscription() const
 {
     return m_subscription;
 }
 
-void UrlAccessRule::setFilterSubscription(FilterSubscription *newSubs)
+void UrlAccessRule::setAdBlockSubscription(AdBlockSubscription *newSubs)
 {
     m_subscription = newSubs;
 }

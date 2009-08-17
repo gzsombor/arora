@@ -20,21 +20,19 @@
 #ifndef URLACCESSRULE_H
 #define URLACCESSRULE_H
 
-#include "filtersubscription.h"
-
 #include <qobject.h>
 #include <qregexp.h>
 #include <qurl.h>
 
-enum Decision {
-    Undecided, Allow, Deny
-};
-
+class AdBlockSubscription;
 class UrlAccessRule: public QObject
 {
 public:
+    enum Decision {
+        Undecided, Allow, Deny
+    };
     UrlAccessRule(bool wildcard, const QString &pattern, bool exception, int hitCount, bool enabled = true,
-                  FilterSubscription *filterSubscription = 0, QObject *parent = 0);
+                  AdBlockSubscription *AdBlockSubscription = 0, QObject *parent = 0);
     ~UrlAccessRule();
     Decision decide(const QUrl &url) const;
 
@@ -49,8 +47,8 @@ public:
     void setHitCount(int newCount);
     void incrementHitCount();
 
-    FilterSubscription *filterSubscription() const;
-    void setFilterSubscription(FilterSubscription *newSubs);
+    AdBlockSubscription *subscription() const;
+    void setAdBlockSubscription(AdBlockSubscription *newSubs);
     void setEnabled(bool enabled);
 
     bool isEditable() const;
@@ -66,15 +64,13 @@ public:
     bool match(const QString &url) const;
 
 private:
-    QString m_pattern;
-    QRegExp *m_regexp;
+    bool m_enabled;
     bool m_exceptionRule;
     int m_hitCount;
-    bool m_enabled;
-    FilterSubscription *m_subscription;
+    QString m_pattern;
+    QRegExp *m_regexp;
+    AdBlockSubscription *m_subscription;
     QString *m_hash;
-
-
 };
 
 #endif // URLACCESSRULE_H
