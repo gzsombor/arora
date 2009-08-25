@@ -79,31 +79,19 @@ UrlAccessRule::UrlAccessRule(QString &line, QObject *parent)
         line = line.left(dollarSign);
     }
     if (wildcard) {
-        m_pattern = line.replace(QRegExp("\\*+"), "*")                                  // remove multiple wildcards
-                .replace(QRegExp("\\^\\|$"), "^")                                       // remove anchors following separator placeholder
-                .replace(QRegExp("^(\\*)"), "")                                      // remove leading wildcards
-                .replace(QRegExp("(\\*)$"), "")                                     // remove trailing wildcards
-                .replace(QRegExp("(\\W)"), "\\\\1")                                      // escape special symbols
-                //.replace(QRegExp("\\.\\*"), ".*")                                          // replace wildcards by .*
-                //.replace(QRegExp("\\\\\\^"), "(?:[^\\w\\-.%\\u0080-\\uFFFF]|$)")           // process separator placeholders
-                .replace(QRegExp("^\\\\\\|\\\\\\|"), "^[\\w\\-]+:\\/+(?!\\/)(?:[^\\/]+\\.)?") // process extended anchor at expression start
-//                .replace(QRegExp("\\\\\\^"), "(?:[^\\w\\-.%\\u0080-\\uFFFF]|$)")           // process separator placeholders
-                .replace(QRegExp("\\\\\\^"), "(?:[^\\w\\d\\-.%]|$)")           // process separator placeholders
-                .replace(QRegExp("^\\\\\\|"), "^")                                         // process anchor at expression start
-                .replace(QRegExp("\\\\\\|$"), "$")                                         // process anchor at expression end
-                .replace(QRegExp("\\\\\\*"), ".*")                                          // replace wildcards by .*
+        m_pattern = line.replace(QRegExp(QLatin1String("\\*+")), QLatin1String("*"))   // remove multiple wildcards
+                .replace(QRegExp(QLatin1String("\\^\\|$")), QLatin1String("^"))        // remove anchors following separator placeholder
+                .replace(QRegExp(QLatin1String("^(\\*)")), QLatin1String(""))          // remove leading wildcards
+                .replace(QRegExp(QLatin1String("(\\*)$")), QLatin1String(""))          // remove trailing wildcards
+                .replace(QRegExp(QLatin1String("(\\W)")), QLatin1String("\\\\1"))      // escape special symbols
+                .replace(QRegExp(QLatin1String("^\\\\\\|\\\\\\|")),
+                         QLatin1String("^[\\w\\-]+:\\/+(?!\\/)(?:[^\\/]+\\.)?"))       // process extended anchor at expression start
+                .replace(QRegExp(QLatin1String("\\\\\\^")),
+                         QLatin1String("(?:[^\\w\\d\\-.%]|$)"))                        // process separator placeholders
+                .replace(QRegExp(QLatin1String("^\\\\\\|")), QLatin1String("^"))       // process anchor at expression start
+                .replace(QRegExp(QLatin1String("\\\\\\|$")), QLatin1String("$"))       // process anchor at expression end
+                .replace(QRegExp(QLatin1String("\\\\\\*")), QLatin1String(".*"))       // replace wildcards by .*
                 ;
-//        m_pattern = line.replace(QRegExp("\\*+"), "*")                                  // remove multiple wildcards
-//                .replace(QRegExp("\\^\\|$"), "^")                                       // remove anchors following separator placeholder
-//                .replace(QRegExp("(\\W)"), "\\$1")                                      // escape special symbols
-//                .replace(QRegExp("\\\\\\*"), ".*")                                         // replace wildcards by .*
-//                .replace(QRegExp("\\\\\\^"), "(?:[^\\w\\-.%\\u0080-\\uFFFF]|$)")           // process separator placeholders
-//                .replace(QRegExp("^\\\\\\|\\\\\\|"), "^[\\w\\-]+:\\/+(?!\\/)(?:[^\\/]+\\.)?") // process extended anchor at expression start
-//                .replace(QRegExp("^\\\\\\|"), "^")                                         // process anchor at expression start
-//                .replace(QRegExp("\\\\\\|$"), "$")                                         // process anchor at expression end
-//                .replace(QRegExp("^(\\.\\*)"), "")                                      // remove leading wildcards
-//                .replace(QRegExp("(\\.\\*)$"), "");                                     // remove trailing wildcards
-//
         m_regexp = new QRegExp(m_pattern, Qt::CaseInsensitive, QRegExp::RegExp2);
     } else {
         m_pattern = line;
