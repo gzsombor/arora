@@ -21,11 +21,15 @@
 
 #include "adblocksubscription.h"
 
+#if defined(NETWORKACCESS_DEBUG)
+#include <qdebug.h>
+#endif
+
 UrlAccessRule::UrlAccessRule(bool wildcard, const QString &pattern, bool exception, int hitCount, bool enabled,
-                             AdBlockSubscription *AdBlockSubscription, QObject *parent)
-    : QObject(parent),m_pattern(pattern),m_enabled(enabled),m_hash(0)
+                             AdBlockSubscription *adBlockSubscription, QObject *parent)
+    : QObject(parent),m_enabled(enabled),m_pattern(pattern),m_hash(0)
 {
-    m_subscription = AdBlockSubscription;
+    m_subscription = adBlockSubscription;
     m_exceptionRule = exception;
 
     if (wildcard) {
@@ -47,6 +51,64 @@ UrlAccessRule::UrlAccessRule(bool wildcard, const QString &pattern, bool excepti
     }
 
     m_hitCount = hitCount;
+#if defined(NETWORKACCESS_DEBUG)
+    qDebug() << "url access rule " << m_pattern << " wildcard:" << wildcard << " regexp :" << m_regexp->pattern();
+#endif
+}
+
+UrlAccessRule::UrlAccessRule(QString &line, QObject *parent)
+    : QObject(parent),m_enabled(true),m_hitCount(0),m_subscription(0),m_hash(0)
+{
+    m_exceptionRule = false;
+    if (line.startsWith(QLatin1String("@@"))) {
+        m_exceptionRule = true;
+        line = line.right(line.size() - 2);
+    }
+    bool wildcard = true;
+    if (line.startsWith(QLatin1Char('/'))) {
+        wildcard = false;
+        line = line.right(line.size() - 1);
+        if (line.endsWith(QLatin1Char('/'))) {
+            line = line.left(line.size() - 1);
+        }
+    }
+    int dollarSign = line.indexOf(QLatin1String("$"), 0);
+    if (dollarSign >= 0) {
+        // some filter contain 'directives' like '$script,image' or '$link,object'
+        // seen : 'third-party,other,object_subrequest, script, image, link, object
+        line = line.left(dollarSign);
+    }
+    if (wildcard) {
+        m_pattern = line.replace(QRegExp("\\*+"), "*")                                  // remove multiple wildcards
+                .replace(QRegExp("\\^\\|$"), "^")                                       // remove anchors following separator placeholder
+                .replace(QRegExp("^(\\*)"), "")                                      // remove leading wildcards
+                .replace(QRegExp("(\\*)$"), "")                                     // remove trailing wildcards
+                .replace(QRegExp("(\\W)"), "\\\\1")                                      // escape special symbols
+                //.replace(QRegExp("\\.\\*"), ".*")                                          // replace wildcards by .*
+                //.replace(QRegExp("\\\\\\^"), "(?:[^\\w\\-.%\\u0080-\\uFFFF]|$)")           // process separator placeholders
+                .replace(QRegExp("^\\\\\\|\\\\\\|"), "^[\\w\\-]+:\\/+(?!\\/)(?:[^\\/]+\\.)?") // process extended anchor at expression start
+//                .replace(QRegExp("\\\\\\^"), "(?:[^\\w\\-.%\\u0080-\\uFFFF]|$)")           // process separator placeholders
+                .replace(QRegExp("\\\\\\^"), "(?:[^\\w\\d\\-.%]|$)")           // process separator placeholders
+                .replace(QRegExp("^\\\\\\|"), "^")                                         // process anchor at expression start
+                .replace(QRegExp("\\\\\\|$"), "$")                                         // process anchor at expression end
+                .replace(QRegExp("\\\\\\*"), ".*")                                          // replace wildcards by .*
+                ;
+//        m_pattern = line.replace(QRegExp("\\*+"), "*")                                  // remove multiple wildcards
+//                .replace(QRegExp("\\^\\|$"), "^")                                       // remove anchors following separator placeholder
+//                .replace(QRegExp("(\\W)"), "\\$1")                                      // escape special symbols
+//                .replace(QRegExp("\\\\\\*"), ".*")                                         // replace wildcards by .*
+//                .replace(QRegExp("\\\\\\^"), "(?:[^\\w\\-.%\\u0080-\\uFFFF]|$)")           // process separator placeholders
+//                .replace(QRegExp("^\\\\\\|\\\\\\|"), "^[\\w\\-]+:\\/+(?!\\/)(?:[^\\/]+\\.)?") // process extended anchor at expression start
+//                .replace(QRegExp("^\\\\\\|"), "^")                                         // process anchor at expression start
+//                .replace(QRegExp("\\\\\\|$"), "$")                                         // process anchor at expression end
+//                .replace(QRegExp("^(\\.\\*)"), "")                                      // remove leading wildcards
+//                .replace(QRegExp("(\\.\\*)$"), "");                                     // remove trailing wildcards
+//
+        m_regexp = new QRegExp(m_pattern, Qt::CaseInsensitive, QRegExp::RegExp2);
+    } else {
+        m_pattern = line;
+        m_regexp = new QRegExp(line, Qt::CaseInsensitive, QRegExp::RegExp2);
+    }
 }
 
 UrlAccessRule::~UrlAccessRule()
@@ -72,7 +134,7 @@ UrlAccessRule::Decision UrlAccessRule::decide(const QUrl &url) const
 
 bool UrlAccessRule::match(const QString &str) const
 {
-    return m_regexp->exactMatch(str);
+    return m_regexp->indexIn(str) != -1;
 }
 
 QString UrlAccessRule::toString() const
@@ -80,7 +142,9 @@ QString UrlAccessRule::toString() const
     return QString(QLatin1String("Rule:"))
             + m_regexp->pattern()
             + QLatin1Char(',')
-            + (m_exceptionRule ? QLatin1String(" exception") : QLatin1String(" filtering rule"));
+            + (m_exceptionRule ? QLatin1String(" exception") : QLatin1String(" filtering rule"))
+            + QLatin1String(", internal pattern: ")
+            + m_pattern;
 }
 
 bool UrlAccessRule::isExceptionRule() const
@@ -151,4 +215,12 @@ bool UrlAccessRule::isEditable() const
 bool UrlAccessRule::isLiveRule() const
 {
     return m_enabled && (m_subscription == 0 || m_subscription->isEnabled());
+}
+
+UrlAccessRule *UrlAccessRule::parse(QString &line, QObject *parent)
+{
+    if (!line.startsWith(QLatin1String("!")) && !line.contains(QLatin1Char('#'))) {
+        return new UrlAccessRule(line, parent);
+    }
+    return 0;
 }

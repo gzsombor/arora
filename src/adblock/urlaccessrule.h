@@ -32,7 +32,9 @@ public:
         Undecided, Allow, Deny
     };
     UrlAccessRule(bool wildcard, const QString &pattern, bool exception, int hitCount, bool enabled = true,
-                  AdBlockSubscription *AdBlockSubscription = 0, QObject *parent = 0);
+                  AdBlockSubscription *adBlockSubscription = 0, QObject *parent = 0);
+    UrlAccessRule(QString &line, QObject *parent = 0);
+
     ~UrlAccessRule();
     Decision decide(const QUrl &url) const;
 
@@ -62,6 +64,8 @@ public:
     bool isLiveRule() const;
 
     bool match(const QString &url) const;
+
+    static UrlAccessRule *parse(QString &line, QObject *parent = 0);
 
 private:
     bool m_enabled;

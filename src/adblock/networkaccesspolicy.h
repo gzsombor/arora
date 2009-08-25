@@ -31,7 +31,8 @@
 #include <qnetworkrequest.h>
 #include <qtextstream.h>
 
-// define NETWORKACCESS_DEBUG
+#define NETWORKACCESS_DEBUG
+
 class AdBlockSubscription;
 class NetworkAccessPolicy : public QObject
 {

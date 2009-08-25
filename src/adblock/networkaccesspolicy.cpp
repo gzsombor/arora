@@ -66,33 +66,6 @@ bool NetworkAccessPolicy::allowedToConnect(const QNetworkRequest &request)
         return true;
     }
 
-#if 0
-#if defined(NETWORKACCESS_DEBUG)
-    QTime time;
-    time.start();
-#endif
-    for (int i = 0; i < m_rules.size(); ++i) {
-        const UrlAccessRule *rule = m_rules.at(i);
-        Decision decision = rule->decide(url);
-        if (decision != Undecided) {
-            const_cast<UrlAccessRule*>(rule)->incrementHitCount();
-#if defined(NETWORKACCESS_DEBUG)
-            int elapsedTime = time.elapsed();
-            m_elapsedTime += elapsedTime;
-            qDebug() << "access to " << url.toString() << " rule matched[" << i << "] : "
-                    << rule->toString() << " result : " << (decision < 0 ? "allowed" : "block")
-                    << " elapsed " << elapsedTime;
-#endif
-            return Allow == decision;
-        }
-    }
-#if defined(NETWORKACCESS_DEBUG)
-    int elapsedTime = time.elapsed();
-    m_elapsedTime += elapsedTime;
-    qDebug() << "elapsed " << time.elapsed() << " for " << url << " full time:" <<m_elapsedTime;
-#endif
-#endif
-
     QString urlString = url.toString();
     const UrlAccessRule *rule = m_acceptRules.get(urlString);
     if (rule) {
@@ -132,6 +105,7 @@ bool NetworkAccessPolicy::importAdBlockRules(QIODevice &importFrom,  QList<UrlAc
     if (!importFrom.open(QIODevice::ReadOnly)) {
 #if defined(NETWORKACCESS_DEBUG)
         qDebug() << QLatin1String("Unable to open : ") << name;
+
 #endif
         return false;
     }
@@ -149,31 +123,8 @@ bool NetworkAccessPolicy::importAdBlockRules(QTextStream &txt,  QList<UrlAccessR
     rules.clear();
     do {
         line = txt.readLine();
-        if (!line.startsWith(QLatin1String("!")) && !line.contains(QLatin1Char('#'))) {
-            bool exception = false;
-
-            if (line.startsWith(QLatin1String("@@"))) {
-                exception = true;
-                line = line.right(line.size() - 2);
-            }
-            bool wildcard = true;
-            if (line.startsWith(QLatin1Char('/'))) {
-                wildcard = false;
-                line = line.right(line.size() - 1);
-                if (line.endsWith(QLatin1Char('/'))) {
-                    line = line.left(line.size() - 1);
-                }
-            }
-            int dollarSign = line.indexOf(QLatin1String("$"), 0);
-            if (dollarSign >= 0) {
-                // some filter contain 'directives' like '$script,image' or '$link,object'
-                // seen : 'third-party,other,object_subrequest, script, image, link, object
-#if defined(NETWORKACCESS_DEBUG)
-                qDebug() << "line :" << line;
-#endif
-                line = line.left(dollarSign);
-            }
-            UrlAccessRule *rule = new UrlAccessRule(wildcard, line, exception, 0);
+        UrlAccessRule *rule = UrlAccessRule::parse(line);
+        if (rule) {
 #if defined(NETWORKACCESS_DEBUG)
             qDebug() << rule->toString();
 #endif

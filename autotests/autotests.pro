@@ -1,5 +1,6 @@
 TEMPLATE = subdirs
 SUBDIRS  = \
+    adblockfilter \
     addbookmarkdialog \
     autosaver \
     cookiejar \
