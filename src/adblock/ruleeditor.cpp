@@ -75,7 +75,7 @@ UrlAccessRule *RuleEditor::createRule(bool newRule)
 #if defined(NETWORKACCESS_DEBUG)
     qDebug() << "set rule " << ruleEdit->text() << " enabled " << enabledCheckBox->isChecked();
 #endif
-    return new UrlAccessRule(!regExpCheckBox->isChecked(), ruleEdit->text(),
+    return new UrlAccessRule(regExpCheckBox->isChecked(), ruleEdit->text(),
             exclusionCheckBox->isChecked(), 0, enabledCheckBox->isChecked(), newRule ? 0 : m_currentSubscription);
 }
 

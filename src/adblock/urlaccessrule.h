@@ -31,7 +31,7 @@ public:
     enum Decision {
         Undecided, Allow, Deny
     };
-    UrlAccessRule(bool wildcard, const QString &pattern, bool exception, int hitCount, bool enabled = true,
+    UrlAccessRule(bool regexpRule, const QString &pattern, bool exception, int hitCount, bool enabled = true,
                   AdBlockSubscription *adBlockSubscription = 0, QObject *parent = 0);
     UrlAccessRule(QString &line, QObject *parent = 0);
 
@@ -42,6 +42,7 @@ public:
 
     bool isExceptionRule() const;
     QString pattern() const;
+    QString regexpPattern() const;
     bool isRegexpRule() const;
     bool isEnabled() const;
 
@@ -66,10 +67,12 @@ public:
     bool match(const QString &url) const;
 
     static UrlAccessRule *parse(QString &line, QObject *parent = 0);
+    static QString convertPattern(QString wildcardPattern);
 
 private:
     bool m_enabled;
     bool m_exceptionRule;
+    bool m_regexpRule;
     int m_hitCount;
     QString m_pattern;
     QRegExp *m_regexp;

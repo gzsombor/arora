@@ -41,10 +41,21 @@ const UrlAccessRule *FilterSelector::get(const QString &url) const
             return candidate;
     }
 
+#if defined(NETWORKACCESS_DEBUG)
+     qDebug() << "get rule for " << url;
+#endif
     for (int i = 0; i < m_extraRules.length(); ++i) {
         UrlAccessRule *candidate = m_extraRules.at(i);
-        if (candidate->match(url))
+        if (candidate->match(url)) {
+#if defined(NETWORKACCESS_DEBUG)
+     qDebug() << "rule " << candidate->toString() << " MATCH";
+#endif
             return candidate;
+        } else {
+#if defined(NETWORKACCESS_DEBUG)
+     qDebug() << "rule " << candidate->toString() << " NOT MATCH";
+#endif
+        }
     }
 
     return 0;

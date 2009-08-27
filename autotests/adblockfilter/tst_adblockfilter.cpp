@@ -370,7 +370,7 @@ void tst_AdBlockFilter::regexpCreation()
      QFETCH(QString, output);
 
      UrlAccessRule rule(input);
-     QCOMPARE(rule.pattern(), output);
+     QCOMPARE(rule.regexpPattern(), output);
 }
 
 

@@ -81,7 +81,7 @@ bool NetworkAccessPolicy::allowedToConnect(const QNetworkRequest &request)
         const_cast<UrlAccessRule*>(rule)->incrementHitCount();
 #if defined(NETWORKACCESS_DEBUG)
         qDebug() << "access to " << urlString << " matched"
-                    << rule->toString() << " --> BLOCK ";
+                    << rule->toString() << " --> BLOCK,hash:" << rule->hash();
 #endif
         return false;
     }
@@ -257,7 +257,7 @@ void NetworkAccessPolicy::load()
         bool regexp = settings.value(QLatin1String("regexp")).toBool();
         int hitCount = settings.value(QLatin1String("hitCount"), 0).toInt();
         bool enabled = settings.value(QLatin1String("enabled"), true).toBool();
-        UrlAccessRule *rule = new UrlAccessRule(!regexp, pattern, excepRule, hitCount, enabled);
+        UrlAccessRule *rule = new UrlAccessRule(regexp, pattern, excepRule, hitCount, enabled);
         int subIndex = settings.value(QLatin1String("subIndex"), -1).toInt();
 #if defined(NETWORKACCESS_DEBUG)
     qDebug()<< "subscription for " << pattern << " is " << subIndex;

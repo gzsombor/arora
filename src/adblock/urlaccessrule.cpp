@@ -25,34 +25,22 @@
 #include <qdebug.h>
 #endif
 
-UrlAccessRule::UrlAccessRule(bool wildcard, const QString &pattern, bool exception, int hitCount, bool enabled,
+UrlAccessRule::UrlAccessRule(bool regexpRule, const QString &pattern, bool exception, int hitCount, bool enabled,
                              AdBlockSubscription *adBlockSubscription, QObject *parent)
-    : QObject(parent),m_enabled(enabled),m_pattern(pattern),m_hash(0)
+    : QObject(parent), m_enabled(enabled), m_hitCount(hitCount), m_pattern(pattern), m_hash(0)
 {
     m_subscription = adBlockSubscription;
     m_exceptionRule = exception;
+    m_regexpRule = regexpRule;
 
-    if (wildcard) {
-        QString cPattern = pattern;
-
-        if (cPattern.startsWith(QLatin1Char('|')))
-            cPattern.remove(0, 1);
-        else
-            cPattern.prepend(QLatin1Char('*'));
-
-        if (cPattern.endsWith(QLatin1Char('|')))
-            cPattern.remove(cPattern.length()-1, 1);
-        else
-            cPattern.append(QLatin1Char('*'));
-
-        m_regexp = new QRegExp(cPattern, Qt::CaseInsensitive, QRegExp::Wildcard);
-    } else {
-        m_regexp = new QRegExp(pattern, Qt::CaseInsensitive, QRegExp::RegExp2);
+    QString regexpPattern = pattern;
+    if (!m_regexpRule) {
+        regexpPattern = convertPattern(pattern);
     }
+    m_regexp = new QRegExp(regexpPattern, Qt::CaseInsensitive, QRegExp::RegExp2);
 
-    m_hitCount = hitCount;
 #if defined(NETWORKACCESS_DEBUG)
-    qDebug() << "url access rule " << m_pattern << " wildcard:" << wildcard << " regexp :" << m_regexp->pattern();
+    qDebug() << "url access rule " << m_pattern << " regexpRule:" << m_regexpRule << " regexp :" << m_regexp->pattern();
 #endif
 }
 
@@ -64,9 +52,9 @@ UrlAccessRule::UrlAccessRule(QString &line, QObject *parent)
         m_exceptionRule = true;
         line = line.right(line.size() - 2);
     }
-    bool wildcard = true;
+    m_regexpRule = false;
     if (line.startsWith(QLatin1Char('/'))) {
-        wildcard = false;
+        m_regexpRule = true;
         line = line.right(line.size() - 1);
         if (line.endsWith(QLatin1Char('/'))) {
             line = line.left(line.size() - 1);
@@ -78,25 +66,28 @@ UrlAccessRule::UrlAccessRule(QString &line, QObject *parent)
         // seen : 'third-party,other,object_subrequest, script, image, link, object
         line = line.left(dollarSign);
     }
-    if (wildcard) {
-        m_pattern = line.replace(QRegExp(QLatin1String("\\*+")), QLatin1String("*"))   // remove multiple wildcards
-                .replace(QRegExp(QLatin1String("\\^\\|$")), QLatin1String("^"))        // remove anchors following separator placeholder
-                .replace(QRegExp(QLatin1String("^(\\*)")), QLatin1String(""))          // remove leading wildcards
-                .replace(QRegExp(QLatin1String("(\\*)$")), QLatin1String(""))          // remove trailing wildcards
-                .replace(QRegExp(QLatin1String("(\\W)")), QLatin1String("\\\\1"))      // escape special symbols
-                .replace(QRegExp(QLatin1String("^\\\\\\|\\\\\\|")),
-                         QLatin1String("^[\\w\\-]+:\\/+(?!\\/)(?:[^\\/]+\\.)?"))       // process extended anchor at expression start
-                .replace(QRegExp(QLatin1String("\\\\\\^")),
-                         QLatin1String("(?:[^\\w\\d\\-.%]|$)"))                        // process separator placeholders
-                .replace(QRegExp(QLatin1String("^\\\\\\|")), QLatin1String("^"))       // process anchor at expression start
-                .replace(QRegExp(QLatin1String("\\\\\\|$")), QLatin1String("$"))       // process anchor at expression end
-                .replace(QRegExp(QLatin1String("\\\\\\*")), QLatin1String(".*"))       // replace wildcards by .*
-                ;
-        m_regexp = new QRegExp(m_pattern, Qt::CaseInsensitive, QRegExp::RegExp2);
-    } else {
-        m_pattern = line;
-        m_regexp = new QRegExp(line, Qt::CaseInsensitive, QRegExp::RegExp2);
+    m_pattern = line;
+    if (!m_regexpRule) {
+        // if not already a regexp rule, we have to convert it
+        line = convertPattern(line);
     }
+    m_regexp = new QRegExp(line, Qt::CaseInsensitive, QRegExp::RegExp2);
+}
+
+QString UrlAccessRule::convertPattern(QString wildcardPattern) {
+    return wildcardPattern.replace(QRegExp(QLatin1String("\\*+")), QLatin1String("*"))   // remove multiple wildcards
+        .replace(QRegExp(QLatin1String("\\^\\|$")), QLatin1String("^"))        // remove anchors following separator placeholder
+        .replace(QRegExp(QLatin1String("^(\\*)")), QLatin1String(""))          // remove leading wildcards
+        .replace(QRegExp(QLatin1String("(\\*)$")), QLatin1String(""))          // remove trailing wildcards
+        .replace(QRegExp(QLatin1String("(\\W)")), QLatin1String("\\\\1"))      // escape special symbols
+        .replace(QRegExp(QLatin1String("^\\\\\\|\\\\\\|")),
+                 QLatin1String("^[\\w\\-]+:\\/+(?!\\/)(?:[^\\/]+\\.)?"))       // process extended anchor at expression start
+        .replace(QRegExp(QLatin1String("\\\\\\^")),
+                 QLatin1String("(?:[^\\w\\d\\-.%]|$)"))                        // process separator placeholders
+        .replace(QRegExp(QLatin1String("^\\\\\\|")), QLatin1String("^"))       // process anchor at expression start
+        .replace(QRegExp(QLatin1String("\\\\\\|$")), QLatin1String("$"))       // process anchor at expression end
+        .replace(QRegExp(QLatin1String("\\\\\\*")), QLatin1String(".*"))       // replace wildcards by .*
+        ;
 }
 
 UrlAccessRule::~UrlAccessRule()
@@ -132,7 +123,10 @@ QString UrlAccessRule::toString() const
             + QLatin1Char(',')
             + (m_exceptionRule ? QLatin1String(" exception") : QLatin1String(" filtering rule"))
             + QLatin1String(", internal pattern: ")
-            + m_pattern;
+            + m_pattern
+            + QLatin1String(", ")
+            + (m_regexpRule ? QLatin1String("regexp mode") : QLatin1String("wildcard mode"));
+
 }
 
 bool UrlAccessRule::isExceptionRule() const
@@ -145,9 +139,14 @@ QString UrlAccessRule::pattern() const
     return m_pattern;
 }
 
+QString UrlAccessRule::regexpPattern() const
+{
+    return m_regexp->pattern();
+}
+
 bool UrlAccessRule::isRegexpRule() const
 {
-    return m_regexp->patternSyntax() == QRegExp::RegExp2;
+    return m_regexpRule;
 }
 
 const QString *UrlAccessRule::hash() const
