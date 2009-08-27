@@ -26,6 +26,17 @@ AdBlockSubscription::AdBlockSubscription()
 {
 }
 
+AdBlockSubscription::AdBlockSubscription(int priority, QString &name, QString &url, QDate &lastFetch, bool enabled)
+    : m_priority(priority)
+    , m_name(name)
+    , m_url(url)
+    , m_lastFetchedDate(lastFetch)
+    , m_enabled(enabled)
+{
+
+}
+
+
 void AdBlockSubscription::setPriority(int priority)
 {
     m_priority = priority;
@@ -48,12 +59,12 @@ QString AdBlockSubscription::name() const
 
 void AdBlockSubscription::setUrl(const QUrl &url)
 {
-    m_url = url.toEncoded();
+    m_url = url.toString();
 }
 
 QUrl AdBlockSubscription::url() const
 {
-    return QUrl::fromEncoded(m_url);
+    return QUrl(m_url);
 }
 
 void AdBlockSubscription::setLastFetchedDate(const QDate &date)

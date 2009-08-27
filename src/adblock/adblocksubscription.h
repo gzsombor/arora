@@ -30,6 +30,7 @@ class AdBlockSubscription
 
 public:
     AdBlockSubscription();
+    AdBlockSubscription(int priority, QString &name, QString &url, QDate &lastFetch, bool enabled);
 
     int priority() const;
     void setPriority(int priority);
@@ -55,7 +56,7 @@ public:
 private:
     int m_priority;
     QString m_name;
-    QByteArray m_url;
+    QString m_url;
     QDate m_lastFetchedDate;
     bool m_enabled;
     // QList<AdBlockFilter> rules

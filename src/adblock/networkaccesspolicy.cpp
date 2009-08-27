@@ -203,11 +203,10 @@ void NetworkAccessPolicy::load()
     settings.beginGroup(QLatin1String("networkAccessPolicy"));
     m_enabled = settings.value(QLatin1String("enabled"), false).toBool();
     m_subscriptions.clear();
-    QList<AdBlockSubscription> subscriptions = qvariant_cast<QList<AdBlockSubscription> >(settings.value(QLatin1String("subscriptions")));
-    foreach (const AdBlockSubscription &subscription, subscriptions)
-        m_subscriptions.append(new AdBlockSubscription(subscription));
+   
     if (!settings.contains(QLatin1String("subscriptions"))) {
         // initialize
+        
         AdBlockSubscription *d1 = new AdBlockSubscription;
         d1->setName(QLatin1String("EasyList (USA)"));
         d1->setUrl(QString(QLatin1String("http://adblockplus.mozdev.org/easylist/easylist.txt")));
@@ -231,6 +230,19 @@ void NetworkAccessPolicy::load()
         m_subscriptions.append(d2);
         m_subscriptions.append(d3);
         m_subscriptions.append(d4);
+    } else {
+        int filterSize = settings.beginReadArray(QLatin1String("subscriptions"));
+        m_subscriptions.clear();
+
+        for (int i = 0; i < filterSize; ++i) {
+            settings.setArrayIndex(i);
+            QString name = settings.value(QLatin1String("name")).toString();
+            QString url = settings.value(QLatin1String("url")).toString();
+            QDate lastFetch = settings.value(QLatin1String("lastFetch")).toDate();
+            bool enabled = settings.value(QLatin1String("enabled"), false).toBool();
+            m_subscriptions.append(new AdBlockSubscription(i, name, url, lastFetch, enabled));
+        }
+        settings.endArray();
     }
 
     int size = settings.beginReadArray(QLatin1String("rules"));
