@@ -21,6 +21,7 @@
 #include "networkaccesspolicy.h"
 
 #include "adblocksubscription.h"
+#include "browserapplication.h"
 
 #include <qdesktopservices.h>
 #include <qfile.h>
@@ -245,28 +246,59 @@ void NetworkAccessPolicy::load()
         settings.endArray();
     }
 
-    int size = settings.beginReadArray(QLatin1String("rules"));
     m_rules->clear();
 
-    for (int i = 0; i < size; ++i) {
-        settings.setArrayIndex(i);
-        //UrlAccessRule *rule = rules.at(i);
-        QString pattern = settings.value(QLatin1String("pattern")).toString();
-
-        bool excepRule = settings.value(QLatin1String("exceptionRule")).toBool();
-        bool regexp = settings.value(QLatin1String("regexp")).toBool();
-        int hitCount = settings.value(QLatin1String("hitCount"), 0).toInt();
-        bool enabled = settings.value(QLatin1String("enabled"), true).toBool();
-        UrlAccessRule *rule = new UrlAccessRule(regexp, pattern, excepRule, hitCount, enabled);
-        int subIndex = settings.value(QLatin1String("subIndex"), -1).toInt();
-#if defined(NETWORKACCESS_DEBUG)
-    qDebug()<< "subscription for " << pattern << " is " << subIndex;
-#endif
-        if (subIndex >= 0)
-            rule->setAdBlockSubscription(m_subscriptions.at(subIndex));
-        m_rules->append(rule);
+    QFile adblockRuleFile(BrowserApplication::getConfigFile(QLatin1String("adblock-rules")));
+    if (adblockRuleFile.exists()) {
+        if (adblockRuleFile.open(QIODevice::ReadOnly)) {
+            QDataStream in(&adblockRuleFile);
+            QString header;
+            in >> header;
+            if (QLatin1String("arora-adblock-rules") == header) {
+                int version;
+                in >> version;
+                if (version == 1) {
+                    int length;
+                    in >> length;
+                    for (int i = 0; i < length; i++) {
+                        UrlAccessRule *rule = new UrlAccessRule();
+                        rule->load(in);
+                        int priority;
+                        in >> priority;
+                        if (priority>=0 && priority < m_subscriptions.size()) {
+                            rule->setAdBlockSubscription(m_subscriptions.at(priority));
+                        }
+                        m_rules->append(rule);
+                    }
+                }
+            }
+        }
     }
-    settings.endArray();
+
+
+
+//    int size = settings.beginReadArray(QLatin1String("rules"));
+//    m_rules->clear();
+//
+//    for (int i = 0; i < size; ++i) {
+//        settings.setArrayIndex(i);
+//        //UrlAccessRule *rule = rules.at(i);
+//        QString pattern = settings.value(QLatin1String("pattern")).toString();
+//
+//        bool excepRule = settings.value(QLatin1String("exceptionRule")).toBool();
+//        bool regexp = settings.value(QLatin1String("regexp")).toBool();
+//        int hitCount = settings.value(QLatin1String("hitCount"), 0).toInt();
+//        bool enabled = settings.value(QLatin1String("enabled"), true).toBool();
+//        UrlAccessRule *rule = new UrlAccessRule(regexp, pattern, excepRule, hitCount, enabled);
+//        int subIndex = settings.value(QLatin1String("subIndex"), -1).toInt();
+//#if defined(NETWORKACCESS_DEBUG)
+//    qDebug()<< "subscription for " << pattern << " is " << subIndex;
+//#endif
+//        if (subIndex >= 0)
+//            rule->setAdBlockSubscription(m_subscriptions.at(subIndex));
+//        m_rules->append(rule);
+//    }
+//    settings.endArray();
     settings.endGroup();
 
     m_acceptRules.rehash();
@@ -282,7 +314,7 @@ void NetworkAccessPolicy::save()
     settings.beginGroup(QLatin1String("networkAccessPolicy"));
     settings.setValue(QLatin1String("enabled"), m_enabled);
 
-    settings.beginWriteArray(QLatin1String("rules"), m_rules->size());
+/*    settings.beginWriteArray(QLatin1String("rules"), m_rules->size());
     for (int i = 0; i < m_rules->size(); ++i) {
         settings.setArrayIndex(i);
         UrlAccessRule *rule = m_rules->at(i);
@@ -300,6 +332,7 @@ void NetworkAccessPolicy::save()
         settings.setValue(QLatin1String("subIndex"), index);
     }
     settings.endArray();
+    */
 
     QList<AdBlockSubscription> subscriptions;
     foreach (const AdBlockSubscription *subscription, m_subscriptions)
@@ -307,4 +340,19 @@ void NetworkAccessPolicy::save()
     QVariant v = qVariantFromValue(subscriptions);
     settings.setValue(QLatin1String("subscriptions"), v);
     settings.endGroup();
+
+    QFile adblockRuleFile(BrowserApplication::getConfigFile(QLatin1String("adblock-rules")));
+    if (adblockRuleFile.open(QIODevice::WriteOnly)) {
+        QDataStream out(&adblockRuleFile);
+        out << QString(QLatin1String("arora-adblock-rules"));
+        out << 1; // version
+        out << m_rules->size();
+        for (int i = 0; i < m_rules->size(); i++) {
+            UrlAccessRule *rule = m_rules->at(i);
+            out << rule;
+            int priority = rule->subscription() ? rule->subscription()->priority() : -1;
+            out << priority;
+        }
+        adblockRuleFile.close();
+    }
 }

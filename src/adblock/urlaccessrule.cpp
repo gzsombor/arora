@@ -33,11 +33,7 @@ UrlAccessRule::UrlAccessRule(bool regexpRule, const QString &pattern, bool excep
     m_exceptionRule = exception;
     m_regexpRule = regexpRule;
 
-    QString regexpPattern = pattern;
-    if (!m_regexpRule) {
-        regexpPattern = convertPattern(pattern);
-    }
-    m_regexp = new QRegExp(regexpPattern, Qt::CaseInsensitive, QRegExp::RegExp2);
+    setPattern(regexpRule, pattern);
 
 #if defined(NETWORKACCESS_DEBUG)
     qDebug() << "url access rule " << m_pattern << " regexpRule:" << m_regexpRule << " regexp :" << m_regexp->pattern();
@@ -66,13 +62,23 @@ UrlAccessRule::UrlAccessRule(QString &line, QObject *parent)
         // seen : 'third-party,other,object_subrequest, script, image, link, object
         line = line.left(dollarSign);
     }
-    m_pattern = line;
-    if (!m_regexpRule) {
-        // if not already a regexp rule, we have to convert it
-        line = convertPattern(line);
-    }
-    m_regexp = new QRegExp(line, Qt::CaseInsensitive, QRegExp::RegExp2);
+    setPattern(m_regexpRule, line);
 }
+
+UrlAccessRule::UrlAccessRule(QObject *parent)
+        : QObject(parent), m_enabled(false), m_hitCount(0), m_subscription(0),
+        m_hash(0), m_regexp(0), m_regexpRule(false)
+{
+
+}
+
+
+/*UrlAccessRule::UrlAccessRule(UrlAccessRule &orig, QObject *parent)
+        : QObject(parent), m_enabled(orig.m_enabled)
+{
+
+}*/
+
 
 QString UrlAccessRule::convertPattern(QString wildcardPattern) {
     return wildcardPattern.replace(QRegExp(QLatin1String("\\*+")), QLatin1String("*"))   // remove multiple wildcards
@@ -96,7 +102,19 @@ UrlAccessRule::~UrlAccessRule()
         delete m_hash;
         m_hash = 0;
     }
-    delete m_regexp;
+    if (m_regexp) {
+        delete m_regexp;
+        m_regexp = 0;
+    }
+}
+
+
+void UrlAccessRule::setPattern(bool regexpRule, QString newPattern)
+{
+    m_regexpRule = regexpRule;
+    m_pattern = newPattern;
+    m_regexp = new QRegExp(m_regexpRule ? newPattern : convertPattern(newPattern),
+                           Qt::CaseInsensitive, QRegExp::RegExp2);
 }
 
 UrlAccessRule::Decision UrlAccessRule::decide(const QUrl &url) const
@@ -211,3 +229,38 @@ UrlAccessRule *UrlAccessRule::parse(QString &line, QObject *parent)
     }
     return 0;
 }
+
+QDataStream &operator>>(QDataStream &in, UrlAccessRule &rule)
+{
+    rule.load(in);
+    return in;
+}
+
+QDataStream &operator<<(QDataStream &out, const UrlAccessRule &rule)
+{
+    rule.save(out);
+    return out;
+}
+
+void UrlAccessRule::load(QDataStream &in)
+{
+    QString pattern;
+    bool regexpRule;
+    in >> m_enabled;
+    in >> pattern;
+    in >> m_exceptionRule;
+    in >> regexpRule;
+    in >> m_hitCount;
+
+    setPattern(regexpRule, pattern);
+}
+
+void UrlAccessRule::save(QDataStream &out) const
+{
+    out << m_enabled;
+    out << m_pattern;
+    out << m_exceptionRule;
+    out << m_regexpRule;
+    out << m_hitCount;
+}
+

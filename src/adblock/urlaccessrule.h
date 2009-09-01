@@ -25,8 +25,9 @@
 #include <qurl.h>
 
 class AdBlockSubscription;
-class UrlAccessRule: public QObject
+class UrlAccessRule : public QObject
 {
+
 public:
     enum Decision {
         Undecided, Allow, Deny
@@ -34,6 +35,8 @@ public:
     UrlAccessRule(bool regexpRule, const QString &pattern, bool exception, int hitCount, bool enabled = true,
                   AdBlockSubscription *adBlockSubscription = 0, QObject *parent = 0);
     UrlAccessRule(QString &line, QObject *parent = 0);
+    UrlAccessRule(QObject *parent = 0);
+//    UrlAccessRule(const UrlAccessRule &orig);
 
     ~UrlAccessRule();
     Decision decide(const QUrl &url) const;
@@ -69,6 +72,9 @@ public:
     static UrlAccessRule *parse(QString &line, QObject *parent = 0);
     static QString convertPattern(QString wildcardPattern);
 
+    void load(QDataStream &in);
+    void save(QDataStream &out) const;
+
 private:
     bool m_enabled;
     bool m_exceptionRule;
@@ -78,6 +84,12 @@ private:
     QRegExp *m_regexp;
     AdBlockSubscription *m_subscription;
     QString *m_hash;
+
+    void setPattern(bool regexpRule, QString newPattern);
 };
+
+QDataStream &operator<<(QDataStream &, const UrlAccessRule &rule);
+QDataStream &operator>>(QDataStream &, UrlAccessRule &rule);
+
 
 #endif // URLACCESSRULE_H
