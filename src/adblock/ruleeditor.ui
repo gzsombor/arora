@@ -92,6 +92,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="removeAllButton">
+            <property name="text">
+             <string>Remove All</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item row="4" column="1">
@@ -228,10 +235,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>removeAllButton</sender>
+   <signal>clicked()</signal>
+   <receiver>RuleEditor</receiver>
+   <slot>deleteAllRule()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>430</x>
+     <y>372</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>229</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addRule()</slot>
   <slot>modifyRule()</slot>
   <slot>deleteRule()</slot>
+  <slot>deleteAllRule()</slot>
  </slots>
 </ui>

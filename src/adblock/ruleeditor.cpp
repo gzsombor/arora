@@ -105,6 +105,11 @@ void RuleEditor::deleteRule()
     }
 }
 
+void RuleEditor::deleteAllRule()
+{
+    m_tableModel->removeRows(0, m_tableModel->currentRules().size());
+}
+
 void RuleEditor::selectionChanged(const QModelIndex &current, const QModelIndex &prev)
 {
     Q_UNUSED(prev);

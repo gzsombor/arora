@@ -39,6 +39,7 @@ protected slots:
     void addRule();
     void modifyRule();
     void deleteRule();
+    void deleteAllRule();
     void accept();
     void selectionChanged(const QModelIndex &current, const QModelIndex &prev);
     void importRules();
