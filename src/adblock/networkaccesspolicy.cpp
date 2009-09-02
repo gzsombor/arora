@@ -349,7 +349,7 @@ void NetworkAccessPolicy::save()
         out << m_rules->size();
         for (int i = 0; i < m_rules->size(); i++) {
             UrlAccessRule *rule = m_rules->at(i);
-            out << rule;
+            rule->save(out);
             int priority = rule->subscription() ? rule->subscription()->priority() : -1;
             out << priority;
         }

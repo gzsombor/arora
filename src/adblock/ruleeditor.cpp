@@ -181,7 +181,7 @@ void RuleEditor::enableButtons(bool flag)
 {
     foreach (QAbstractButton *button, buttonBox->buttons()) {
         QDialogButtonBox::StandardButton buttonType = buttonBox->standardButton(button);
-        if (buttonType != QDialogButtonBox::Cancel)
+        if (buttonType != QDialogButtonBox::Cancel && buttonType != QDialogButtonBox::Ok)
             button->setEnabled(flag);
     }
 }

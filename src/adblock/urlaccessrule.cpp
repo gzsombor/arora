@@ -72,14 +72,6 @@ UrlAccessRule::UrlAccessRule(QObject *parent)
 
 }
 
-
-/*UrlAccessRule::UrlAccessRule(UrlAccessRule &orig, QObject *parent)
-        : QObject(parent), m_enabled(orig.m_enabled)
-{
-
-}*/
-
-
 QString UrlAccessRule::convertPattern(QString wildcardPattern) {
     return wildcardPattern.replace(QRegExp(QLatin1String("\\*+")), QLatin1String("*"))   // remove multiple wildcards
         .replace(QRegExp(QLatin1String("\\^\\|$")), QLatin1String("^"))        // remove anchors following separator placeholder
@@ -251,12 +243,17 @@ void UrlAccessRule::load(QDataStream &in)
     in >> m_exceptionRule;
     in >> regexpRule;
     in >> m_hitCount;
-
+#if defined(NETWORKACCESS_DEBUG)
+    qDebug() << "load " << m_enabled << pattern << m_exceptionRule << regexpRule << m_hitCount;
+#endif
     setPattern(regexpRule, pattern);
 }
 
 void UrlAccessRule::save(QDataStream &out) const
 {
+#if defined(NETWORKACCESS_DEBUG)
+    qDebug() << "save " << m_enabled << m_pattern << m_exceptionRule << m_regexpRule << m_hitCount;
+#endif
     out << m_enabled;
     out << m_pattern;
     out << m_exceptionRule;
