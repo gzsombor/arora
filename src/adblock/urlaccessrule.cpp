@@ -62,7 +62,7 @@ UrlAccessRule::UrlAccessRule(QString &line, QObject *parent)
         // seen : 'third-party,other,object_subrequest, script, image, link, object
         line = line.left(dollarSign);
     }
-    setPattern(m_regexpRule, line);
+    setPattern(m_regexpRule, line.trimmed());
 }
 
 UrlAccessRule::UrlAccessRule(QObject *parent)
@@ -217,7 +217,9 @@ bool UrlAccessRule::isLiveRule() const
 UrlAccessRule *UrlAccessRule::parse(QString &line, QObject *parent)
 {
     if (!line.startsWith(QLatin1String("!")) && !line.contains(QLatin1Char('#'))) {
-        return new UrlAccessRule(line, parent);
+        if (line.trimmed().length()>0) {
+            return new UrlAccessRule(line, parent);
+        }
     }
     return 0;
 }

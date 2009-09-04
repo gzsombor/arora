@@ -35,7 +35,7 @@
 #endif
 
 NetworkAccessPolicy::NetworkAccessPolicy(QObject *parent) :
-    QObject(parent), m_acceptRules(true, this), m_blockRules(false, this)
+    QObject(parent), m_acceptRules(true, this), m_blockRules(false, this), m_autoSaver(this)
 {
     m_rules = new QList<UrlAccessRule*>();
     m_acceptRules.setRules(m_rules);
@@ -48,6 +48,7 @@ NetworkAccessPolicy::NetworkAccessPolicy(QObject *parent) :
 
 NetworkAccessPolicy::~NetworkAccessPolicy()
 {
+    m_autoSaver.saveIfNeccessary();
     delete m_rules;
 }
 
@@ -75,6 +76,7 @@ bool NetworkAccessPolicy::allowedToConnect(const QNetworkRequest &request)
         qDebug() << "access to " << urlString << " matched"
                     << rule->toString() << " --> ALLOW ";
 #endif
+        m_autoSaver.changeOccurred();
         return true;
     }
     rule = m_blockRules.get(urlString);
@@ -84,6 +86,7 @@ bool NetworkAccessPolicy::allowedToConnect(const QNetworkRequest &request)
         qDebug() << "access to " << urlString << " matched"
                     << rule->toString() << " --> BLOCK,hash:" << rule->hash();
 #endif
+        m_autoSaver.changeOccurred();
         return false;
     }
     return true;

@@ -23,6 +23,7 @@
 
 #include <qobject.h>
 
+#include "autosaver.h"
 #include "urlaccessrule.h"
 #include "filterselector.h"
 
@@ -60,10 +61,10 @@ public:
     bool isEnabled() { return m_enabled; }
 
     void load();
-    void save();
 
 public slots:
     void subscriptionStateChanged();
+    void save();
 
 private:
     FilterSelector m_acceptRules;
@@ -71,6 +72,7 @@ private:
     QList<UrlAccessRule*> *m_rules;
     QList<AdBlockSubscription*> m_subscriptions;
     bool m_enabled;
+    AutoSaver m_autoSaver;
 #if defined(NETWORKACCESS_DEBUG)
     int m_elapsedTime;
 #endif
