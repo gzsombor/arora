@@ -138,10 +138,9 @@ void RuleEditor::accept()
 
 void RuleEditor::save()
 {
-    if (adblockerGroupBox->isChecked()) {
-        QList<UrlAccessRule*> *cr = new QList<UrlAccessRule*>(m_tableModel->currentRules());
-        m_accessPolicy->setAccessRules(*cr);
-    }
+    QList<UrlAccessRule*> *cr = new QList<UrlAccessRule*>(m_tableModel->currentRules());
+    m_accessPolicy->setAccessRules(*cr);
+    m_accessPolicy->setEnabled(adblockerGroupBox->isChecked());
 }
 
 void RuleEditor::importRules()
@@ -174,7 +173,6 @@ void RuleEditor::viewSubscriptions()
 void RuleEditor::setAdblockEnabled(bool flag)
 {
     enableButtons(flag);
-    m_accessPolicy->setEnabled(flag);
 }
 
 void RuleEditor::enableButtons(bool flag)
