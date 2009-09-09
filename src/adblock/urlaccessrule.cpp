@@ -25,9 +25,12 @@
 #include <qdebug.h>
 #endif
 
-UrlAccessRule::UrlAccessRule(bool regexpRule, const QString &pattern, bool exception, int hitCount, bool enabled,
-                             AdBlockSubscription *adBlockSubscription, QObject *parent)
-    : QObject(parent), m_enabled(enabled), m_hitCount(hitCount), m_pattern(pattern), m_hash(0)
+UrlAccessRule::UrlAccessRule(bool regexpRule, const QString &pattern, bool exception, int hitCount, bool enabled, AdBlockSubscription *adBlockSubscription, QObject *parent)
+    : QObject(parent)
+    , m_enabled(enabled)
+    , m_hitCount(hitCount)
+    , m_pattern(pattern)
+    , m_hash(0)
 {
     m_subscription = adBlockSubscription;
     m_exceptionRule = exception;
@@ -66,10 +69,14 @@ UrlAccessRule::UrlAccessRule(QString &line, QObject *parent)
 }
 
 UrlAccessRule::UrlAccessRule(QObject *parent)
-        : QObject(parent), m_enabled(false), m_hitCount(0), m_subscription(0),
-        m_hash(0), m_regexp(0), m_regexpRule(false)
+    : QObject(parent)
+    , m_enabled(false)
+    , m_hitCount(0)
+    , m_regexp(0)
+    , m_regexpRule(false)
+    , m_subscription(0)
+    , m_hash(0)
 {
-
 }
 
 QString UrlAccessRule::convertPattern(QString wildcardPattern) {
