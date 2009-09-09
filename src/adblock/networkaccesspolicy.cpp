@@ -207,10 +207,10 @@ void NetworkAccessPolicy::load()
     settings.beginGroup(QLatin1String("networkAccessPolicy"));
     m_enabled = settings.value(QLatin1String("enabled"), false).toBool();
     m_subscriptions.clear();
-   
+
     if (!settings.contains(QLatin1String("subscriptions"))) {
         // initialize
-        
+
         AdBlockSubscription *d1 = new AdBlockSubscription;
         d1->setName(QLatin1String("EasyList (USA)"));
         d1->setUrl(QString(QLatin1String("http://adblockplus.mozdev.org/easylist/easylist.txt")));
@@ -251,7 +251,7 @@ void NetworkAccessPolicy::load()
 
     m_rules->clear();
 
-    QFile adblockRuleFile(BrowserApplication::getConfigFile(QLatin1String("adblock-rules")));
+    QFile adblockRuleFile(BrowserApplication::dataFilePath(QLatin1String("adblock-rules")));
     if (adblockRuleFile.exists()) {
         if (adblockRuleFile.open(QIODevice::ReadOnly)) {
             QDataStream in(&adblockRuleFile);
@@ -263,7 +263,7 @@ void NetworkAccessPolicy::load()
                 if (version == 1) {
                     int length;
                     in >> length;
-                    for (int i = 0; i < length; i++) {
+                    for (int i = 0; i < length; ++i) {
                         UrlAccessRule *rule = new UrlAccessRule();
                         rule->load(in);
                         int priority;
@@ -344,13 +344,13 @@ void NetworkAccessPolicy::save()
     settings.setValue(QLatin1String("subscriptions"), v);
     settings.endGroup();
 
-    QFile adblockRuleFile(BrowserApplication::getConfigFile(QLatin1String("adblock-rules")));
+    QFile adblockRuleFile(BrowserApplication::dataFilePath(QLatin1String("adblock-rules")));
     if (adblockRuleFile.open(QIODevice::WriteOnly)) {
         QDataStream out(&adblockRuleFile);
         out << QString(QLatin1String("arora-adblock-rules"));
         out << 1; // version
         out << m_rules->size();
-        for (int i = 0; i < m_rules->size(); i++) {
+        for (int i = 0; i < m_rules->size(); ++i) {
             UrlAccessRule *rule = m_rules->at(i);
             rule->save(out);
             int priority = rule->subscription() ? rule->subscription()->priority() : -1;
