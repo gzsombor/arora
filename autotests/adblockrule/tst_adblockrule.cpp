@@ -22,10 +22,10 @@
 #include <iostream>
 #include <qbuffer.h>
 
-#include <urlaccessrule.h>
+#include <adblockrule.h>
 #include <networkaccesspolicy.h>
 
-class tst_AdBlockFilter : public QObject
+class tst_AdBlockRule : public QObject
 {
     Q_OBJECT
 
@@ -44,21 +44,21 @@ private slots:
 };
 
 // Subclass that exposes the protected functions.
-class SubAdBlockFilter
+class SubAdBlockRule
 {
 public:
-    SubAdBlockFilter(QString &filter);
+    SubAdBlockRule(QString &filter);
     bool match(const QUrl &url);
-    UrlAccessRule *rule;
+    AdBlockRule *rule;
 };
 
-SubAdBlockFilter::SubAdBlockFilter(QString &filter)
+SubAdBlockRule::SubAdBlockRule(QString &filter)
     : rule(0)
 {
-    rule = UrlAccessRule::parse(filter);
+    rule = AdBlockRule::parse(filter);
 }
 
-bool SubAdBlockFilter::match(const QUrl &url)
+bool SubAdBlockRule::match(const QUrl &url)
 {
     if (!rule)
         return false;
@@ -67,27 +67,27 @@ bool SubAdBlockFilter::match(const QUrl &url)
 
 // This will be called before the first test function is executed.
 // It is only called once.
-void tst_AdBlockFilter::initTestCase()
+void tst_AdBlockRule::initTestCase()
 {
 }
 
 // This will be called after the last test function is executed.
 // It is only called once.
-void tst_AdBlockFilter::cleanupTestCase()
+void tst_AdBlockRule::cleanupTestCase()
 {
 }
 
 // This will be called before each test function is executed.
-void tst_AdBlockFilter::init()
+void tst_AdBlockRule::init()
 {
 }
 
 // This will be called after every test function.
-void tst_AdBlockFilter::cleanup()
+void tst_AdBlockRule::cleanup()
 {
 }
 
-void tst_AdBlockFilter::match_data()
+void tst_AdBlockRule::match_data()
 {
     QTest::addColumn<QString>("filter");
     QTest::addColumn<QUrl>("url");
@@ -311,24 +311,24 @@ void tst_AdBlockFilter::match_data()
 }
 
 // public bool match(const QUrl &url) const
-void tst_AdBlockFilter::match()
+void tst_AdBlockRule::match()
 {
     QFETCH(QString, filter);
     QFETCH(QUrl, url);
     QFETCH(bool, match);
 
 
-    SubAdBlockFilter adBlockFilter(filter);
-    bool result = adBlockFilter.match(url);
+    SubAdBlockRule AdBlockRule(filter);
+    bool result = AdBlockRule.match(url);
     if (result!=match) {
         std::cout << "ERROR "  << filter.toStdString() << " url : " << url.toString().toStdString()
                 << " result : " << (result ? "match" : "NOT match")
-                << "\n\t---> RULE : " << adBlockFilter.rule->toString().toStdString() << std::endl;
+                << "\n\t---> RULE : " << AdBlockRule.rule->toString().toStdString() << std::endl;
     }
-    QCOMPARE(adBlockFilter.match(url), match);
+    QCOMPARE(AdBlockRule.match(url), match);
 }
 
-void tst_AdBlockFilter::regexpCreation_data()
+void tst_AdBlockRule::regexpCreation_data()
 {
     QTest::addColumn<QString>("input");
     QTest::addColumn<QString>("output");
@@ -364,16 +364,16 @@ void tst_AdBlockFilter::regexpCreation_data()
             << QString("^[\\w\\-]+:\\/+(?!\\/)(?:[^\\/]+\\.)?example\\.com\\/banner\\.gif");
 }
 
-void tst_AdBlockFilter::regexpCreation()
+void tst_AdBlockRule::regexpCreation()
 {
      QFETCH(QString, input);
      QFETCH(QString, output);
 
-     UrlAccessRule rule(input);
+     AdBlockRule rule(input);
      QCOMPARE(rule.regexpPattern(), output);
 }
 
 
-QTEST_MAIN(tst_AdBlockFilter)
-#include "tst_adblockfilter.moc"
+QTEST_MAIN(tst_AdBlockRule)
+#include "tst_adblockrule.moc"
 

@@ -89,7 +89,7 @@ bool RuleTableModel::removeRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
-void RuleTableModel::setCurrentRules(const QList<UrlAccessRule*> &newRules)
+void RuleTableModel::setCurrentRules(const QList<AdBlockRule*> &newRules)
 {
     beginRemoveRows(QModelIndex(), 0, m_rules.size());
     m_rules.clear();
@@ -99,20 +99,20 @@ void RuleTableModel::setCurrentRules(const QList<UrlAccessRule*> &newRules)
     endInsertRows();
 }
 
-void RuleTableModel::append(UrlAccessRule *rule)
+void RuleTableModel::append(AdBlockRule *rule)
 {
     beginInsertRows(QModelIndex(), m_rules.size(), m_rules.size());
     m_rules.append(rule);
     endInsertRows();
 }
 
-void RuleTableModel::setData(int row, UrlAccessRule *rule)
+void RuleTableModel::setData(int row, AdBlockRule *rule)
 {
     m_rules.replace(row, rule);
     emit dataChanged(index(row, 0), index(row + 1, 3));
 }
 
-QList<UrlAccessRule*> RuleTableModel::currentRules() const
+QList<AdBlockRule*> RuleTableModel::currentRules() const
 {
     return m_rules;
 }

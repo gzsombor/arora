@@ -56,7 +56,7 @@ void SubscriptionDownload::downloadFinished()
 #endif
     QByteArray response = m_reply->readAll();
     QTextStream txt(response);
-    QList<UrlAccessRule*> rules;
+    QList<AdBlockRule*> rules;
 
     if (NetworkAccessPolicy::importAdBlockRules(txt, rules)) {
         m_policy->setAccessRules(m_destination, rules);

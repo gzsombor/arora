@@ -2,10 +2,10 @@ INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
 HEADERS += \
+    adblockrule.h \
     adblocksubscription.h \
     blockednetworkreply.h \
     networkaccesspolicy.h \
-    urlaccessrule.h \
     ruleeditor.h \
     ruletablemodel.h \
     subscriptioneditor.h \
@@ -14,10 +14,10 @@ HEADERS += \
     filterselector.h
 
 SOURCES += \
+    adblockrule.cpp \
     adblocksubscription.cpp \
     blockednetworkreply.cpp \
     networkaccesspolicy.cpp \
-    urlaccessrule.cpp \
     ruleeditor.cpp \
     ruletablemodel.cpp \
     subscriptioneditor.cpp \

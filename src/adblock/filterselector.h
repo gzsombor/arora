@@ -20,7 +20,7 @@
 #ifndef FILTERSELECTOR_H
 #define FILTERSELECTOR_H
 
-#include "urlaccessrule.h"
+#include "adblockrule.h"
 
 #include <qhash.h>
 #include <qlist.h>
@@ -33,18 +33,18 @@ class FilterSelector : public QObject
 public:
     FilterSelector(bool exceptionRules, QObject *parent = 0);
 
-    const UrlAccessRule *get(const QString &url) const;
+    const AdBlockRule *get(const QString &url) const;
 
-    void setRules(QList<UrlAccessRule*> *rules);
+    void setRules(QList<AdBlockRule*> *rules);
 
 public slots:
     void rehash();
 
 private:
     bool m_exceptionRules;
-    QList<UrlAccessRule*> *m_allRules;
-    QHash<QString,UrlAccessRule*> m_ruleHash;
-    QList<UrlAccessRule*> m_extraRules;
+    QList<AdBlockRule*> *m_allRules;
+    QHash<QString,AdBlockRule*> m_ruleHash;
+    QList<AdBlockRule*> m_extraRules;
 };
 
 #endif // FILTERSELECTOR_H

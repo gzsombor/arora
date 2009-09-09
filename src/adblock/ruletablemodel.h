@@ -37,14 +37,14 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
 
-    QList<UrlAccessRule*> currentRules() const;
-    void setCurrentRules(const QList<UrlAccessRule*> &newRules);
+    QList<AdBlockRule*> currentRules() const;
+    void setCurrentRules(const QList<AdBlockRule*> &newRules);
 
-    void setData(int row, UrlAccessRule *rule);
-    void append(UrlAccessRule *rule);
+    void setData(int row, AdBlockRule *rule);
+    void append(AdBlockRule *rule);
 
 private:
-    QList<UrlAccessRule*> m_rules;
+    QList<AdBlockRule*> m_rules;
 
 };
 

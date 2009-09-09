@@ -37,7 +37,7 @@
 NetworkAccessPolicy::NetworkAccessPolicy(QObject *parent) :
     QObject(parent), m_acceptRules(true, this), m_blockRules(false, this), m_autoSaver(this)
 {
-    m_rules = new QList<UrlAccessRule*>();
+    m_rules = new QList<AdBlockRule*>();
     m_acceptRules.setRules(m_rules);
     m_blockRules.setRules(m_rules);
 #if defined(NETWORKACCESS_DEBUG)
@@ -69,9 +69,9 @@ bool NetworkAccessPolicy::allowedToConnect(const QNetworkRequest &request)
     }
 
     QString urlString = url.toString();
-    const UrlAccessRule *rule = m_acceptRules.get(urlString);
+    const AdBlockRule *rule = m_acceptRules.get(urlString);
     if (rule) {
-        const_cast<UrlAccessRule*>(rule)->incrementHitCount();
+        const_cast<AdBlockRule*>(rule)->incrementHitCount();
 #if defined(NETWORKACCESS_DEBUG)
         qDebug() << "access to " << urlString << " matched"
                     << rule->toString() << " --> ALLOW ";
@@ -81,7 +81,7 @@ bool NetworkAccessPolicy::allowedToConnect(const QNetworkRequest &request)
     }
     rule = m_blockRules.get(urlString);
     if (rule) {
-        const_cast<UrlAccessRule*>(rule)->incrementHitCount();
+        const_cast<AdBlockRule*>(rule)->incrementHitCount();
 #if defined(NETWORKACCESS_DEBUG)
         qDebug() << "access to " << urlString << " matched"
                     << rule->toString() << " --> BLOCK,hash:" << rule->hash();
@@ -92,7 +92,7 @@ bool NetworkAccessPolicy::allowedToConnect(const QNetworkRequest &request)
     return true;
 }
 
-bool NetworkAccessPolicy::importAdBlockRulesFromFile(QFile &importFrom,  QList<UrlAccessRule*> &rules)
+bool NetworkAccessPolicy::importAdBlockRulesFromFile(QFile &importFrom,  QList<AdBlockRule*> &rules)
 {
     if (!importFrom.exists()) {
 #if defined(NETWORKACCESS_DEBUG)
@@ -103,7 +103,7 @@ bool NetworkAccessPolicy::importAdBlockRulesFromFile(QFile &importFrom,  QList<U
     return NetworkAccessPolicy::importAdBlockRules(importFrom, rules, importFrom.fileName());
 }
 
-bool NetworkAccessPolicy::importAdBlockRules(QIODevice &importFrom,  QList<UrlAccessRule*> &rules, const QString &name)
+bool NetworkAccessPolicy::importAdBlockRules(QIODevice &importFrom,  QList<AdBlockRule*> &rules, const QString &name)
 {
     Q_UNUSED(name)
     if (!importFrom.open(QIODevice::ReadOnly)) {
@@ -117,7 +117,7 @@ bool NetworkAccessPolicy::importAdBlockRules(QIODevice &importFrom,  QList<UrlAc
     return NetworkAccessPolicy::importAdBlockRules(txt, rules);
 }
 
-bool NetworkAccessPolicy::importAdBlockRules(QTextStream &txt,  QList<UrlAccessRule*> &rules)
+bool NetworkAccessPolicy::importAdBlockRules(QTextStream &txt,  QList<AdBlockRule*> &rules)
 {
     QString header = txt.readLine(1024);
     if (!header.startsWith(QLatin1String("[Adblock"))) {
@@ -127,7 +127,7 @@ bool NetworkAccessPolicy::importAdBlockRules(QTextStream &txt,  QList<UrlAccessR
     rules.clear();
     do {
         line = txt.readLine();
-        UrlAccessRule *rule = UrlAccessRule::parse(line);
+        AdBlockRule *rule = AdBlockRule::parse(line);
         if (rule) {
 #if defined(NETWORKACCESS_DEBUG)
             qDebug() << rule->toString();
@@ -139,7 +139,7 @@ bool NetworkAccessPolicy::importAdBlockRules(QTextStream &txt,  QList<UrlAccessR
     return true;
 }
 
-void NetworkAccessPolicy::exportSettings(QList<UrlAccessRule*> &rules, QFile &fileToExport)
+void NetworkAccessPolicy::exportSettings(QList<AdBlockRule*> &rules, QFile &fileToExport)
 {
     Q_UNUSED(rules)
     if (!fileToExport.open(QIODevice::WriteOnly)) {
@@ -153,12 +153,12 @@ void NetworkAccessPolicy::exportSettings(QList<UrlAccessRule*> &rules, QFile &fi
 }
 
 
-const QList<UrlAccessRule*> *NetworkAccessPolicy::accessRules() const
+const QList<AdBlockRule*> *NetworkAccessPolicy::accessRules() const
 {
     return m_rules;
 }
 
-void NetworkAccessPolicy::setAccessRules(QList<UrlAccessRule*> &newRules)
+void NetworkAccessPolicy::setAccessRules(QList<AdBlockRule*> &newRules)
 {
 #if defined(NETWORKACCESS_DEBUG)
         qDebug() << "NetworkAccessPolicy::" << __FUNCTION__ << newRules.size();
@@ -170,14 +170,14 @@ void NetworkAccessPolicy::setAccessRules(QList<UrlAccessRule*> &newRules)
     save();
 }
 
-void NetworkAccessPolicy::setAccessRules(AdBlockSubscription *subscription, QList<UrlAccessRule*> &newRules)
+void NetworkAccessPolicy::setAccessRules(AdBlockSubscription *subscription, QList<AdBlockRule*> &newRules)
 {
 #if defined(NETWORKACCESS_DEBUG)
         qDebug() << "setAccessRules for : " << subscription->name() << " len : " << newRules.size();
 #endif
 
     for (int i= m_rules->size() - 1; i >= 0; --i) {
-        UrlAccessRule *rule = m_rules->at(i);
+        AdBlockRule *rule = m_rules->at(i);
         if (rule->subscription() == subscription)
             m_rules->removeAt(i);
     }
@@ -264,7 +264,7 @@ void NetworkAccessPolicy::load()
                     int length;
                     in >> length;
                     for (int i = 0; i < length; ++i) {
-                        UrlAccessRule *rule = new UrlAccessRule();
+                        AdBlockRule *rule = new AdBlockRule();
                         rule->load(in);
                         int priority;
                         in >> priority;
@@ -285,14 +285,14 @@ void NetworkAccessPolicy::load()
 //
 //    for (int i = 0; i < size; ++i) {
 //        settings.setArrayIndex(i);
-//        //UrlAccessRule *rule = rules.at(i);
+//        //AdBlockRule *rule = rules.at(i);
 //        QString pattern = settings.value(QLatin1String("pattern")).toString();
 //
 //        bool excepRule = settings.value(QLatin1String("exceptionRule")).toBool();
 //        bool regexp = settings.value(QLatin1String("regexp")).toBool();
 //        int hitCount = settings.value(QLatin1String("hitCount"), 0).toInt();
 //        bool enabled = settings.value(QLatin1String("enabled"), true).toBool();
-//        UrlAccessRule *rule = new UrlAccessRule(regexp, pattern, excepRule, hitCount, enabled);
+//        AdBlockRule *rule = new AdBlockRule(regexp, pattern, excepRule, hitCount, enabled);
 //        int subIndex = settings.value(QLatin1String("subIndex"), -1).toInt();
 //#if defined(NETWORKACCESS_DEBUG)
 //    qDebug()<< "subscription for " << pattern << " is " << subIndex;
@@ -320,7 +320,7 @@ void NetworkAccessPolicy::save()
 /*    settings.beginWriteArray(QLatin1String("rules"), m_rules->size());
     for (int i = 0; i < m_rules->size(); ++i) {
         settings.setArrayIndex(i);
-        UrlAccessRule *rule = m_rules->at(i);
+        AdBlockRule *rule = m_rules->at(i);
         settings.setValue(QLatin1String("pattern"), rule->pattern());
         settings.setValue(QLatin1String("exceptionRule"),rule->isExceptionRule());
         settings.setValue(QLatin1String("regexp"),rule->isRegexpRule());
@@ -351,7 +351,7 @@ void NetworkAccessPolicy::save()
         out << 1; // version
         out << m_rules->size();
         for (int i = 0; i < m_rules->size(); ++i) {
-            UrlAccessRule *rule = m_rules->at(i);
+            AdBlockRule *rule = m_rules->at(i);
             rule->save(out);
             int priority = rule->subscription() ? rule->subscription()->priority() : -1;
             out << priority;

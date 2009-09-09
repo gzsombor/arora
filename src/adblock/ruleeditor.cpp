@@ -63,19 +63,19 @@ RuleEditor::RuleEditor(NetworkAccessPolicy *datas, QWidget *parent)
 
 void RuleEditor::addRule()
 {
-    UrlAccessRule *newRule = createRule(true);
+    AdBlockRule *newRule = createRule(true);
     m_tableModel->append(newRule);
     int index = m_tableModel->currentRules().indexOf(newRule);
     if (index >= 0)
         ruleListView->selectRow(index);
 }
 
-UrlAccessRule *RuleEditor::createRule(bool newRule)
+AdBlockRule *RuleEditor::createRule(bool newRule)
 {
 #if defined(NETWORKACCESS_DEBUG)
     qDebug() << "set rule " << ruleEdit->text() << " enabled " << enabledCheckBox->isChecked();
 #endif
-    return new UrlAccessRule(regExpCheckBox->isChecked(), ruleEdit->text(),
+    return new AdBlockRule(regExpCheckBox->isChecked(), ruleEdit->text(),
             exclusionCheckBox->isChecked(), 0, enabledCheckBox->isChecked(), newRule ? 0 : m_currentSubscription);
 }
 
@@ -116,7 +116,7 @@ void RuleEditor::selectionChanged(const QModelIndex &current, const QModelIndex 
     if (current.row() < 0 || m_tableModel->rowCount() <= current.row()) {
         return;
     }
-    UrlAccessRule *rule = m_tableModel->currentRules().at(current.row());
+    AdBlockRule *rule = m_tableModel->currentRules().at(current.row());
 #if defined(NETWORKACCESS_DEBUG)
     qDebug() << "rule " << rule->pattern() << " enabled " << rule->isEnabled() << " editable " << rule->isEditable();
 
@@ -138,7 +138,7 @@ void RuleEditor::accept()
 
 void RuleEditor::save()
 {
-    QList<UrlAccessRule*> *cr = new QList<UrlAccessRule*>(m_tableModel->currentRules());
+    QList<AdBlockRule*> *cr = new QList<AdBlockRule*>(m_tableModel->currentRules());
     m_accessPolicy->setAccessRules(*cr);
     m_accessPolicy->setEnabled(adblockerGroupBox->isChecked());
 }
@@ -151,7 +151,7 @@ void RuleEditor::importRules()
     qDebug() << "file name selected " << fileName;
 #endif
     if (fileName.length() > 0) {
-        QList<UrlAccessRule*> *newRules = new QList<UrlAccessRule*>();
+        QList<AdBlockRule*> *newRules = new QList<AdBlockRule*>();
         QFile importFile (fileName);
         if (NetworkAccessPolicy::importAdBlockRulesFromFile(importFile, *newRules)) {
             m_tableModel->setCurrentRules(*newRules);

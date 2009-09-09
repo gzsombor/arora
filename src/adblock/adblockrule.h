@@ -1,5 +1,6 @@
 /*
- * Copyright 2009 Zsombor Gegesy <gzsombor@gmail.com>
+ * Copyright (c) 2009, Zsombor Gegesy <gzsombor@gmail.com>
+ * Copyright (c) 2009, Benjamin C. Meyer <ben@meyerhome.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,28 +18,30 @@
  * Boston, MA  02110-1301  USA
  */
 
-#ifndef URLACCESSRULE_H
-#define URLACCESSRULE_H
+#ifndef ADBLOCKRULE_H
+#define ADBLOCKRULE_H
 
 #include <qobject.h>
 #include <qregexp.h>
 #include <qurl.h>
 
 class AdBlockSubscription;
-class UrlAccessRule : public QObject
+class AdBlockRule : public QObject
 {
 
 public:
     enum Decision {
         Undecided, Allow, Deny
     };
-    UrlAccessRule(bool regexpRule, const QString &pattern, bool exception, int hitCount, bool enabled = true,
-                  AdBlockSubscription *adBlockSubscription = 0, QObject *parent = 0);
-    UrlAccessRule(QString &line, QObject *parent = 0);
-    UrlAccessRule(QObject *parent = 0);
-//    UrlAccessRule(const UrlAccessRule &orig);
 
-    ~UrlAccessRule();
+    AdBlockRule(bool regexpRule, const QString &pattern,
+                bool exception, int hitCount, bool enabled = true,
+                AdBlockSubscription *adBlockSubscription = 0, QObject *parent = 0);
+    AdBlockRule(QString &line, QObject *parent = 0);
+    AdBlockRule(QObject *parent = 0);
+//    AdBlockRule(const AdBlockRule &orig);
+
+    ~AdBlockRule();
     Decision decide(const QUrl &url) const;
 
     QString toString() const;
@@ -69,7 +72,7 @@ public:
 
     bool match(const QString &url) const;
 
-    static UrlAccessRule *parse(QString &line, QObject *parent = 0);
+    static AdBlockRule *parse(QString &line, QObject *parent = 0);
     static QString convertPattern(QString wildcardPattern);
 
     void load(QDataStream &in);
@@ -88,8 +91,8 @@ private:
     void setPattern(bool regexpRule, QString newPattern);
 };
 
-QDataStream &operator<<(QDataStream &, const UrlAccessRule &rule);
-QDataStream &operator>>(QDataStream &, UrlAccessRule &rule);
+QDataStream &operator<<(QDataStream &, const AdBlockRule &rule);
+QDataStream &operator>>(QDataStream &, AdBlockRule &rule);
 
+#endif // ADBLOCKRULE_H
 
-#endif // URLACCESSRULE_H

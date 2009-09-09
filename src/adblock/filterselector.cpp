@@ -32,11 +32,11 @@ FilterSelector::FilterSelector(bool exceptionRules, QObject *parent)
 {
 }
 
-const UrlAccessRule *FilterSelector::get(const QString &url) const
+const AdBlockRule *FilterSelector::get(const QString &url) const
 {
     for (int i = 0; i < url.length() - HASH_LEN; ++i) {
         QString substr = url.mid(i, HASH_LEN);
-        UrlAccessRule *candidate = m_ruleHash.value(substr);
+        AdBlockRule *candidate = m_ruleHash.value(substr);
         if (candidate && candidate->match(url))
             return candidate;
     }
@@ -45,7 +45,7 @@ const UrlAccessRule *FilterSelector::get(const QString &url) const
      qDebug() << "get rule for " << url;
 #endif
     for (int i = 0; i < m_extraRules.length(); ++i) {
-        UrlAccessRule *candidate = m_extraRules.at(i);
+        AdBlockRule *candidate = m_extraRules.at(i);
         if (candidate->match(url)) {
 #if defined(NETWORKACCESS_DEBUG)
      qDebug() << "rule " << candidate->toString() << " MATCH";
@@ -61,7 +61,7 @@ const UrlAccessRule *FilterSelector::get(const QString &url) const
     return 0;
 }
 
-void FilterSelector::setRules(QList<UrlAccessRule*> *rules)
+void FilterSelector::setRules(QList<AdBlockRule*> *rules)
 {
     m_allRules = rules;
     rehash();
@@ -76,7 +76,7 @@ void FilterSelector::rehash()
 #endif
 
     for (int i = 0; i < m_allRules->size(); ++i) {
-        UrlAccessRule *rule = m_allRules->at(i);
+        AdBlockRule *rule = m_allRules->at(i);
 
         // filter out not enabled rules, or rules which are for blocking, when this filter selector is for accepting
         if (rule->isLiveRule() && rule->isExceptionRule() == m_exceptionRules) {

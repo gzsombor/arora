@@ -24,7 +24,7 @@
 #include <qobject.h>
 
 #include "autosaver.h"
-#include "urlaccessrule.h"
+#include "adblockrule.h"
 #include "filterselector.h"
 
 #include <qfile.h>
@@ -45,15 +45,15 @@ public:
 
     bool allowedToConnect(const QNetworkRequest &request);
 
-    static bool importAdBlockRules(QTextStream &txt,  QList<UrlAccessRule*> &rules);
-    static bool importAdBlockRules(QIODevice &importFrom,  QList<UrlAccessRule*> &rules, const QString &name);
-    static bool importAdBlockRulesFromFile(QFile &importFrom,  QList<UrlAccessRule*> &rules);
-    static void exportSettings(QList<UrlAccessRule*> &rules, QFile &fileToExport);
+    static bool importAdBlockRules(QTextStream &txt,  QList<AdBlockRule*> &rules);
+    static bool importAdBlockRules(QIODevice &importFrom,  QList<AdBlockRule*> &rules, const QString &name);
+    static bool importAdBlockRulesFromFile(QFile &importFrom,  QList<AdBlockRule*> &rules);
+    static void exportSettings(QList<AdBlockRule*> &rules, QFile &fileToExport);
 
-    const QList<UrlAccessRule*> *accessRules() const;
-    void setAccessRules(QList<UrlAccessRule*> &newRules);
+    const QList<AdBlockRule*> *accessRules() const;
+    void setAccessRules(QList<AdBlockRule*> &newRules);
 
-    void setAccessRules(AdBlockSubscription *subscription, QList<UrlAccessRule*> &newRules);
+    void setAccessRules(AdBlockSubscription *subscription, QList<AdBlockRule*> &newRules);
     QList<AdBlockSubscription*> &subscriptions() { return m_subscriptions; }
 
     void setEnabled(bool flag) { m_enabled = flag; }
@@ -69,7 +69,7 @@ public slots:
 private:
     FilterSelector m_acceptRules;
     FilterSelector m_blockRules;
-    QList<UrlAccessRule*> *m_rules;
+    QList<AdBlockRule*> *m_rules;
     QList<AdBlockSubscription*> m_subscriptions;
     bool m_enabled;
     AutoSaver m_autoSaver;

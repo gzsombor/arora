@@ -6,5 +6,5 @@ INCLUDEPATH += .
 include(../autotests.pri)
 
 # Input
-SOURCES += tst_adblockfilter.cpp
+SOURCES += tst_adblockrule.cpp
 HEADERS +=

@@ -51,7 +51,7 @@ private:
     NetworkAccessPolicy *m_accessPolicy;
     AdBlockSubscription *m_currentSubscription;
 
-    UrlAccessRule *createRule(bool newRule);
+    AdBlockRule *createRule(bool newRule);
     void enableButtons(bool flag);
 };
 
