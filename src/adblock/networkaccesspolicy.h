@@ -24,7 +24,6 @@
 #include <qobject.h>
 
 #include "autosaver.h"
-#include "adblockrule.h"
 #include "filterselector.h"
 
 #include <qfile.h>

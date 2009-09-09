@@ -22,68 +22,79 @@
 
 #include "adblocksubscription.h"
 
-#if defined(NETWORKACCESS_DEBUG)
+#include <qregexp.h>
 #include <qdebug.h>
-#endif
 
-AdBlockRule::AdBlockRule(bool regexpRule, const QString &pattern,
-                         bool exception, int hitCount, bool enabled,
-                         AdBlockSubscription *adBlockSubscription, QObject *parent)
-    : QObject(parent)
-    , m_enabled(enabled)
-    , m_hitCount(hitCount)
-    , m_pattern(pattern)
-    , m_hash(0)
-{
-    m_subscription = adBlockSubscription;
-    m_exceptionRule = exception;
-    m_regexpRule = regexpRule;
+// #define ADBLOCKRULE_DEBUG
 
-    setPattern(regexpRule, pattern);
-
-#if defined(NETWORKACCESS_DEBUG)
-    qDebug() << "url access rule " << m_pattern << " regexpRule:" << m_regexpRule << " regexp :" << m_regexp->pattern();
-#endif
-}
-
-AdBlockRule::AdBlockRule(QString &line, QObject *parent)
-    : QObject(parent),m_enabled(true),m_hitCount(0),m_subscription(0),m_hash(0)
-{
-    m_exceptionRule = false;
-    if (line.startsWith(QLatin1String("@@"))) {
-        m_exceptionRule = true;
-        line = line.right(line.size() - 2);
-    }
-    m_regexpRule = false;
-    if (line.startsWith(QLatin1Char('/'))) {
-        m_regexpRule = true;
-        line = line.right(line.size() - 1);
-        if (line.endsWith(QLatin1Char('/'))) {
-            line = line.left(line.size() - 1);
-        }
-    }
-    int dollarSign = line.indexOf(QLatin1String("$"), 0);
-    if (dollarSign >= 0) {
-        // some filter contain 'directives' like '$script,image' or '$link,object'
-        // seen : 'third-party,other,object_subrequest, script, image, link, object
-        line = line.left(dollarSign);
-    }
-    setPattern(m_regexpRule, line.trimmed());
-}
-
-AdBlockRule::AdBlockRule(QObject *parent)
-    : QObject(parent)
-    , m_enabled(false)
+AdBlockRule::AdBlockRule(const QString &filter)
+    : m_isNull(false)
+    , m_enabled(true)
+    , m_exceptionRule(false)
     , m_regexpRule(false)
     , m_hitCount(0)
-    , m_regexp(0)
     , m_subscription(0)
-    , m_hash(0)
 {
+    parseFilter(filter);
 }
 
-QString AdBlockRule::convertPattern(QString wildcardPattern) {
-    return wildcardPattern.replace(QRegExp(QLatin1String("\\*+")), QLatin1String("*"))   // remove multiple wildcards
+void AdBlockRule::parseFilter(const QString &filter)
+{
+    m_filter = filter;
+    if (filter.startsWith(QLatin1String("!"))
+        || filter.contains(QLatin1Char('#'))
+        || filter.trimmed().isEmpty()) {
+        m_isNull = true;
+        return;
+    }
+
+    QString parsedLine = filter;
+    if (parsedLine.startsWith(QLatin1String("@@"))) {
+        m_exceptionRule = true;
+        parsedLine = parsedLine.right(parsedLine.size() - 2);
+    }
+    if (parsedLine.startsWith(QLatin1Char('/'))) {
+        m_regexpRule = true;
+        parsedLine = parsedLine.right(parsedLine.size() - 1);
+        if (parsedLine.endsWith(QLatin1Char('/'))) {
+            parsedLine = parsedLine.left(parsedLine.size() - 1);
+        }
+    }
+    int dollarSign = parsedLine.indexOf(QLatin1String("$"), 0);
+    if (dollarSign >= 0) {
+        m_options = parsedLine.mid(dollarSign + 1).split(QLatin1Char(','));
+        // some filter contain 'directives' like '$script,image' or '$link,object'
+        // seen : 'third-party,other,object_subrequest, script, image, link, object
+        parsedLine = parsedLine.left(dollarSign);
+    }
+    setPattern(m_regexpRule, parsedLine.trimmed());
+
+    if (m_options.contains(QLatin1String("match-case"))) {
+        m_regexp.setCaseSensitivity(Qt::CaseSensitive);
+        m_options.removeOne(QLatin1String("match-case"));
+    }
+}
+
+void AdBlockRule::setPattern(bool regexpRule, const QString &newPattern)
+{
+    m_regexpRule = regexpRule;
+    m_regexp = QRegExp(m_regexpRule ? newPattern : convertPattern(newPattern),
+                           Qt::CaseInsensitive, QRegExp::RegExp2);
+}
+
+QString AdBlockRule::pattern() const
+{
+    return m_pattern;
+}
+
+bool AdBlockRule::isRegexpRule() const
+{
+    return m_regexpRule;
+}
+
+QString AdBlockRule::convertPattern(const QString &wildcardPattern) {
+    QString pattern = wildcardPattern;
+    return pattern.replace(QRegExp(QLatin1String("\\*+")), QLatin1String("*"))   // remove multiple wildcards
         .replace(QRegExp(QLatin1String("\\^\\|$")), QLatin1String("^"))        // remove anchors following separator placeholder
         .replace(QRegExp(QLatin1String("^(\\*)")), QLatin1String(""))          // remove leading wildcards
         .replace(QRegExp(QLatin1String("(\\*)$")), QLatin1String(""))          // remove trailing wildcards
@@ -98,54 +109,72 @@ QString AdBlockRule::convertPattern(QString wildcardPattern) {
         ;
 }
 
-AdBlockRule::~AdBlockRule()
+bool AdBlockRule::match(const QString &encodedUrl) const
 {
-    if (m_hash) {
-        delete m_hash;
-        m_hash = 0;
+   if (m_isNull) {
+#if defined(ADBLOCKRULE_DEBUG)
+        qDebug() << "AdBlockRule::" << __FUNCTION__ << "isNull";
+#endif
+        return false;
     }
-    if (m_regexp) {
-        delete m_regexp;
-        m_regexp = 0;
+
+    if (!m_enabled) {
+#if defined(ADBLOCKRULE_DEBUG)
+        qDebug() << "AdBlockRule::" << __FUNCTION__ << "is not enabled";
+#endif
+        return false;
     }
-}
 
-void AdBlockRule::setPattern(bool regexpRule, QString newPattern)
-{
-    m_regexpRule = regexpRule;
-    m_pattern = newPattern;
-    m_regexp = new QRegExp(m_regexpRule ? newPattern : convertPattern(newPattern),
-                           Qt::CaseInsensitive, QRegExp::RegExp2);
-}
+    if (m_subscription && !m_subscription->isEnabled()) {
+#if defined(ADBLOCKRULE_DEBUG)
+        qDebug() << "AdBlockRule::" << __FUNCTION__ << "subscription is not enabled";
+#endif
+        return false;
+    }
 
-AdBlockRule::Decision AdBlockRule::decide(const QUrl &url) const
-{
-    if (!m_enabled)
-        return Undecided;
+    bool matched = m_regexp.indexIn(encodedUrl) != -1;
 
-    if (m_subscription != 0 && !m_subscription->isEnabled())
-        return Undecided;
+    if (matched
+        && !m_options.isEmpty()) {
 
-    QString str = url.toString();
-    return match(str) ? (m_exceptionRule ? Allow : Deny) : Undecided;
-}
+        // we only support domain right now
+        if (m_options.count() == 1) {
+            foreach (const QString &option, m_options) {
+                if (option.startsWith(QLatin1String("domain="))) {
+                    QUrl url = QUrl::fromEncoded(encodedUrl.toUtf8());
+                    QString host = url.host();
+                    QStringList domainOptions = option.mid(7).split(QLatin1Char('|'));
+                    foreach (QString domainOption, domainOptions) {
+                        bool negate = domainOption.at(0) == QLatin1Char('~');
+                        if (negate)
+                            domainOption = domainOption.mid(1);
+                        bool hostMatched = domainOption == host;
+                        if (hostMatched && !negate)
+                            return true;
+                        if (!hostMatched && negate)
+                            return true;
+                    }
+                }
+            }
+        }
 
-bool AdBlockRule::match(const QString &str) const
-{
-    return m_regexp->indexIn(str) != -1;
+#if defined(ADBLOCKRULE_DEBUG)
+        qDebug() << "AdBlockRule::" << __FUNCTION__ << "options are currently not supported";
+#endif
+        return false;
+    }
+
+    return matched;
 }
 
 QString AdBlockRule::toString() const
 {
-    return QString(QLatin1String("Rule:"))
-            + m_regexp->pattern()
-            + QLatin1Char(',')
-            + (m_exceptionRule ? QLatin1String(" exception") : QLatin1String(" filtering rule"))
-            + QLatin1String(", internal pattern: ")
-            + m_pattern
-            + QLatin1String(", ")
-            + (m_regexpRule ? QLatin1String("regexp mode") : QLatin1String("wildcard mode"));
+    return m_filter;
+}
 
+void AdBlockRule::setExceptionRule(bool exception)
+{
+    m_exceptionRule = exception;
 }
 
 bool AdBlockRule::isExceptionRule() const
@@ -153,34 +182,14 @@ bool AdBlockRule::isExceptionRule() const
     return m_exceptionRule;
 }
 
-QString AdBlockRule::pattern() const
-{
-    return m_pattern;
-}
-
-QString AdBlockRule::regexpPattern() const
-{
-    return m_regexp->pattern();
-}
-
-bool AdBlockRule::isRegexpRule() const
-{
-    return m_regexpRule;
-}
-
-const QString *AdBlockRule::hash() const
-{
-    return m_hash;
-}
-
-void AdBlockRule::setHash(const QString &hash)
-{
-    m_hash = new QString(hash);
-}
-
 bool AdBlockRule::isEnabled() const
 {
     return m_enabled;
+}
+
+void AdBlockRule::setEnabled(bool enabled)
+{
+    m_enabled = enabled;
 }
 
 int AdBlockRule::hitCount() const
@@ -193,11 +202,6 @@ void AdBlockRule::setHitCount(int newCount)
     m_hitCount = newCount;
 }
 
-void AdBlockRule::incrementHitCount()
-{
-    ++m_hitCount;
-}
-
 AdBlockSubscription *AdBlockRule::subscription() const
 {
     return m_subscription;
@@ -208,29 +212,14 @@ void AdBlockRule::setAdBlockSubscription(AdBlockSubscription *newSubs)
     m_subscription = newSubs;
 }
 
-void AdBlockRule::setEnabled(bool enabled)
-{
-    m_enabled = enabled;
-}
-
 bool AdBlockRule::isEditable() const
 {
-    return m_subscription == 0;
+    return !m_subscription;
 }
 
 bool AdBlockRule::isLiveRule() const
 {
-    return m_enabled && (m_subscription == 0 || m_subscription->isEnabled());
-}
-
-AdBlockRule *AdBlockRule::parse(QString &line, QObject *parent)
-{
-    if (!line.startsWith(QLatin1String("!")) && !line.contains(QLatin1Char('#'))) {
-        if (line.trimmed().length()>0) {
-            return new AdBlockRule(line, parent);
-        }
-    }
-    return 0;
+    return m_enabled && (!m_subscription || m_subscription->isEnabled());
 }
 
 QDataStream &operator>>(QDataStream &in, AdBlockRule &rule)
@@ -247,28 +236,12 @@ QDataStream &operator<<(QDataStream &out, const AdBlockRule &rule)
 
 void AdBlockRule::load(QDataStream &in)
 {
-    QString pattern;
-    bool regexpRule;
-    in >> m_enabled;
-    in >> pattern;
-    in >> m_exceptionRule;
-    in >> regexpRule;
-    in >> m_hitCount;
-#if defined(NETWORKACCESS_DEBUG)
-    qDebug() << "load " << m_enabled << pattern << m_exceptionRule << regexpRule << m_hitCount;
-#endif
-    setPattern(regexpRule, pattern);
+    in >> m_filter;
+    parseFilter(m_filter);
 }
 
 void AdBlockRule::save(QDataStream &out) const
 {
-#if defined(NETWORKACCESS_DEBUG)
-    qDebug() << "save " << m_enabled << m_pattern << m_exceptionRule << m_regexpRule << m_hitCount;
-#endif
-    out << m_enabled;
-    out << m_pattern;
-    out << m_exceptionRule;
-    out << m_regexpRule;
-    out << m_hitCount;
+    out << m_filter;
 }
 

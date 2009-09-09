@@ -19,6 +19,7 @@
 
 #include "ruleeditor.h"
 
+#include "adblockrule.h"
 #include "ruletablemodel.h"
 #include "subscriptioneditor.h"
 
@@ -75,8 +76,12 @@ AdBlockRule *RuleEditor::createRule(bool newRule)
 #if defined(NETWORKACCESS_DEBUG)
     qDebug() << "set rule " << ruleEdit->text() << " enabled " << enabledCheckBox->isChecked();
 #endif
-    return new AdBlockRule(regExpCheckBox->isChecked(), ruleEdit->text(),
-            exclusionCheckBox->isChecked(), 0, enabledCheckBox->isChecked(), newRule ? 0 : m_currentSubscription);
+    AdBlockRule *rule = new AdBlockRule();
+    rule->setPattern(regExpCheckBox->isChecked(), ruleEdit->text());
+    rule->setExceptionRule(exclusionCheckBox->isChecked());
+    rule->setEnabled(enabledCheckBox->isChecked());
+    rule->setAdBlockSubscription(newRule ? 0 : m_currentSubscription);
+    return rule;
 }
 
 void RuleEditor::modifyRule()

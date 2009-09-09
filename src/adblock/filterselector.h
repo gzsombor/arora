@@ -20,12 +20,11 @@
 #ifndef FILTERSELECTOR_H
 #define FILTERSELECTOR_H
 
-#include "adblockrule.h"
-
 #include <qhash.h>
 #include <qlist.h>
 #include <qobject.h>
 
+class AdBlockRule;
 class FilterSelector : public QObject
 {
     Q_OBJECT
@@ -43,7 +42,7 @@ public slots:
 private:
     bool m_exceptionRules;
     QList<AdBlockRule*> *m_allRules;
-    QHash<QString,AdBlockRule*> m_ruleHash;
+    QHash<QString, AdBlockRule*> m_ruleHash;
     QList<AdBlockRule*> m_extraRules;
 };
 

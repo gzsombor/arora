@@ -20,6 +20,7 @@
 
 #include "networkaccesspolicy.h"
 
+#include "adblockrule.h"
 #include "adblocksubscription.h"
 #include "browserapplication.h"
 
@@ -59,11 +60,11 @@ bool NetworkAccessPolicy::allowedToConnect(const QNetworkRequest &request)
         return true;
     }
 
-    QUrl url = request.url();
-    QString host = url.host();
+    const QUrl url = request.url();
+    const QString host = url.host();
     if (url.toString().startsWith(QLatin1String("data:"))) {
 #if defined(NETWORKACCESS_DEBUG)
-            qDebug() << "access to " << url.toString() << " is allowed anytime";
+        qDebug() << "access to " << url.toString() << " is allowed anytime";
 #endif
         return true;
     }
@@ -84,7 +85,7 @@ bool NetworkAccessPolicy::allowedToConnect(const QNetworkRequest &request)
         const_cast<AdBlockRule*>(rule)->incrementHitCount();
 #if defined(NETWORKACCESS_DEBUG)
         qDebug() << "access to " << urlString << " matched"
-                    << rule->toString() << " --> BLOCK,hash:" << rule->hash();
+                    << rule->toString();
 #endif
         m_autoSaver.changeOccurred();
         return false;
@@ -127,7 +128,7 @@ bool NetworkAccessPolicy::importAdBlockRules(QTextStream &txt,  QList<AdBlockRul
     rules.clear();
     do {
         line = txt.readLine();
-        AdBlockRule *rule = AdBlockRule::parse(line);
+        AdBlockRule *rule = new AdBlockRule(line);
         if (rule) {
 #if defined(NETWORKACCESS_DEBUG)
             qDebug() << rule->toString();

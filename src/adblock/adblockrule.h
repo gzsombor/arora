@@ -21,74 +21,61 @@
 #ifndef ADBLOCKRULE_H
 #define ADBLOCKRULE_H
 
-#include <qobject.h>
-#include <qregexp.h>
 #include <qurl.h>
+#include <qstringlist.h>
 
+class QRegExp;
 class AdBlockSubscription;
-class AdBlockRule : public QObject
+class AdBlockRule
 {
 
 public:
-    enum Decision {
-        Undecided, Allow, Deny
-    };
+    AdBlockRule(const QString &filter = QString());
 
-    AdBlockRule(bool regexpRule, const QString &pattern,
-                bool exception, int hitCount, bool enabled = true,
-                AdBlockSubscription *adBlockSubscription = 0, QObject *parent = 0);
-    AdBlockRule(QString &line, QObject *parent = 0);
-    AdBlockRule(QObject *parent = 0);
-//    AdBlockRule(const AdBlockRule &orig);
-
-    ~AdBlockRule();
-    Decision decide(const QUrl &url) const;
-
+    bool isNull() const { return m_isNull; }
     QString toString() const;
+    bool match(const QString &encodedUrl) const;
 
+    void setExceptionRule(bool exception);
     bool isExceptionRule() const;
-    QString pattern() const;
-    QString regexpPattern() const;
-    bool isRegexpRule() const;
+
     bool isEnabled() const;
+    void setEnabled(bool enabled);
 
     int hitCount() const;
     void setHitCount(int newCount);
-    void incrementHitCount();
+    inline void incrementHitCount() { ++m_hitCount; }
+
+    QString pattern() const;
+    bool isRegexpRule() const;
+    void setPattern(bool regexpRule, const QString &newPattern);
 
     AdBlockSubscription *subscription() const;
     void setAdBlockSubscription(AdBlockSubscription *newSubs);
-    void setEnabled(bool enabled);
 
     bool isEditable() const;
-
-    const QString *hash() const;
-    void setHash(const QString &hash);
-
-    /**
-      * return true, when it's enabled, and the subscription if it exists is enabled too.
-      */
     bool isLiveRule() const;
-
-    bool match(const QString &url) const;
-
-    static AdBlockRule *parse(QString &line, QObject *parent = 0);
-    static QString convertPattern(QString wildcardPattern);
 
     void load(QDataStream &in);
     void save(QDataStream &out) const;
 
+protected:
+    void parseFilter(const QString &filter);
+    static QString convertPattern(const QString &wildcardPattern);
+    QString regexpPattern() const { return m_regexp.pattern(); }
+
 private:
+    QString m_filter;
+    bool m_isNull;
+    QStringList m_options;
+
     bool m_enabled;
     bool m_exceptionRule;
     bool m_regexpRule;
     int m_hitCount;
     QString m_pattern;
-    QRegExp *m_regexp;
+    QRegExp m_regexp;
     AdBlockSubscription *m_subscription;
-    QString *m_hash;
-
-    void setPattern(bool regexpRule, QString newPattern);
 };
 
 QDataStream &operator<<(QDataStream &, const AdBlockRule &rule);

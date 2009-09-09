@@ -19,6 +19,8 @@
 
 #include "ruletablemodel.h"
 
+#include "adblockrule.h"
+
 RuleTableModel::RuleTableModel(NetworkAccessPolicy *datas, QObject *parent)
     : QAbstractTableModel(parent)
     , m_rules(*datas->accessRules())

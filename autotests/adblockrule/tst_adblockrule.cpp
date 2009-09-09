@@ -19,7 +19,6 @@
 
 #include <QtTest/QtTest>
 
-#include <iostream>
 #include <qbuffer.h>
 
 #include <adblockrule.h>
@@ -44,25 +43,16 @@ private slots:
 };
 
 // Subclass that exposes the protected functions.
-class SubAdBlockRule
+class SubAdBlockRule : public AdBlockRule
 {
 public:
-    SubAdBlockRule(QString &filter);
-    bool match(const QUrl &url);
-    AdBlockRule *rule;
+    SubAdBlockRule(const QString &filter);
+    QString sub_regexpPattern() const { return regexpPattern(); }
 };
 
-SubAdBlockRule::SubAdBlockRule(QString &filter)
-    : rule(0)
+SubAdBlockRule::SubAdBlockRule(const QString &filter)
+    : AdBlockRule(filter)
 {
-    rule = AdBlockRule::parse(filter);
-}
-
-bool SubAdBlockRule::match(const QUrl &url)
-{
-    if (!rule)
-        return false;
-    return rule->match(url.toString());
 }
 
 // This will be called before the first test function is executed.
@@ -92,34 +82,34 @@ void tst_AdBlockRule::match_data()
     QTest::addColumn<QString>("filter");
     QTest::addColumn<QUrl>("url");
     QTest::addColumn<bool>("match");
-    QTest::newRow("null") << QString() << QUrl() << true;
+    QTest::newRow("null") << QString() << QUrl() << false;
 
     //Examples taken from http://adblockplus.org/en/filters
 
     // Basic filter rules
-    QTest::newRow("b0") << QString("http://example.com/ads/banner123.gif")
-                        << QUrl("http://example.com/ads/banner123.gif")
-                        << true;
-    QTest::newRow("b1") << QString("http://example.com/ads/banner*.gif")
-                        << QUrl("http://example.com/ads/banner123.gif")
-                        << true;
-    QTest::newRow("b2") << QString("http://example.com/ads/*")
-                        << QUrl("http://example.com/ads/banner123.gif")
-                        << true;
-    QTest::newRow("b3") << QString("http://example.com/*")
-                        << QUrl("http://example.com/ads/banner123.gif")
-                        << true;
+    QTest::newRow("basic0") << QString("http://example.com/ads/banner123.gif")
+                            << QUrl("http://example.com/ads/banner123.gif")
+                            << true;
+    QTest::newRow("basic1") << QString("http://example.com/ads/banner*.gif")
+                            << QUrl("http://example.com/ads/banner123.gif")
+                            << true;
+    QTest::newRow("basic2") << QString("http://example.com/ads/*")
+                            << QUrl("http://example.com/ads/banner123.gif")
+                            << true;
+    QTest::newRow("basic3") << QString("http://example.com/*")
+                            << QUrl("http://example.com/ads/banner123.gif")
+                            << true;
 
     // defining exception rules
-    QTest::newRow("e0") << QString("@@advice")
-                        << QUrl("http://example.com/advice.html")
-                        << true;
-    QTest::newRow("e1") << QString("@@|http://example.com")
-                        << QUrl("http://example.com/advice.html")
-                        << true;
-    QTest::newRow("e2") << QString("@@http://example.com")
-                        << QUrl("http://example.com/advice.html")
-                        << true;
+    QTest::newRow("exception0") << QString("@@advice")
+                                << QUrl("http://example.com/advice.html")
+                                << true;
+    QTest::newRow("exception1") << QString("@@|http://example.com")
+                                << QUrl("http://example.com/advice.html")
+                                << true;
+    QTest::newRow("exception2") << QString("@@http://example.com")
+                                << QUrl("http://example.com/advice.html")
+                                << true;
 
     // matching at beginning/end of an address
     QTest::newRow("m0") << QString("ad")
@@ -201,13 +191,15 @@ void tst_AdBlockRule::match_data()
     QTest::newRow("s3") << QString("^example.com^")
                          << QUrl("http://example.com:8000/foo.bar?a=12&b=%D1%82%D0%B5%D1%81%D1%82")
                          << true;
-    QTest::newRow("s4") << QString("^%D1%82%D0%B5%D1%81%D1%82^")
-                         << QUrl("http://example.com:8000/foo.bar?a=12&b=%D1%82%D0%B5%D1%81%D1%82")
+    QTest::newRow("s4") << QString("^%D1^")
+                         << QUrl::fromEncoded("http://example.com:8000/foo.bar?a=12&b=%D1")
                          << true;
     QTest::newRow("s5") << QString("^foo.bar^")
                          << QUrl("http://example.com:8000/foo.bar?a=12&b=%D1%82%D0%B5%D1%81%D1%82")
                          << true;
-
+    QTest::newRow("s6") << QString("^%D1%82%D0%B5%D1%81%D1%82^")
+                         << QUrl::fromEncoded("http://example.com:8000/foo.bar?a=12&b=%D1%82%D0%B5%D1%81%D1%82")
+                         << true;
     // Comments
     QTest::newRow("c0") << QString("!foo.bar")
                         << QUrl("!foo.bar")
@@ -216,7 +208,6 @@ void tst_AdBlockRule::match_data()
                         << QUrl("foo.bar")
                         << false;
 
-#if defined(NOT_IMPLEMENTED_ADBLOCK_FEATURES)
     // Specifying filter options
     // type
     QTest::newRow("o0") << QString("*/ads/*$script,image,background,stylesheet,object,xbl,ping,xmlhttprequest,object-subrequest,object-subrequest,dtd,subdocument,document,other")
@@ -265,13 +256,12 @@ void tst_AdBlockRule::match_data()
                          << false;
     // collapse
     // TODO test collapse somehow
-    QTest::newRow("o11") << QString("*/BannerAd.gif$collapse")
+    QTest::newRow("o13") << QString("*/BannerAd.gif$collapse")
                          << QUrl("http://example.com/bannerad.gif")
-                         << true;
-    QTest::newRow("o12") << QString("*/BannerAd.gif$~collapse")
+                         << false;
+    QTest::newRow("o14") << QString("*/BannerAd.gif$~collapse")
                          << QUrl("http://example.com/bannerad.gif")
-                         << true;
-#endif
+                         << false;
     // Regular expressions
     QTest::newRow("r0") << QString("/banner\\d+/")
                          << QUrl("banner123")
@@ -283,7 +273,6 @@ void tst_AdBlockRule::match_data()
                          << QUrl("banners")
                          << false;
 
-#if defined(NOT_IMPLEMENTED_ADBLOCK_FEATURES)
     // Element hiding
     // TODO
     QTest::newRow("e0") << QString("##div.textad")
@@ -307,7 +296,6 @@ void tst_AdBlockRule::match_data()
     // TODO more
     // Attribute selectors
     // Advanced selectors
-#endif
 }
 
 // public bool match(const QUrl &url) const
@@ -317,15 +305,15 @@ void tst_AdBlockRule::match()
     QFETCH(QUrl, url);
     QFETCH(bool, match);
 
-
     SubAdBlockRule AdBlockRule(filter);
-    bool result = AdBlockRule.match(url);
-    if (result!=match) {
-        std::cout << "ERROR "  << filter.toStdString() << " url : " << url.toString().toStdString()
-                << " result : " << (result ? "match" : "NOT match")
-                << "\n\t---> RULE : " << AdBlockRule.rule->toString().toStdString() << std::endl;
+    bool result = AdBlockRule.match(url.toEncoded());
+    if (result != match) {
+        qDebug() << "Match error.";
+        qDebug() << "\tFilter:" << filter;
+        qDebug() << "\tUrl: " << url;
+        qDebug() << "\tResult : " << (result ? "match" : "NOT match");
     }
-    QCOMPARE(AdBlockRule.match(url), match);
+    QCOMPARE(AdBlockRule.match(url.toEncoded()), match);
 }
 
 void tst_AdBlockRule::regexpCreation_data()
@@ -369,10 +357,9 @@ void tst_AdBlockRule::regexpCreation()
      QFETCH(QString, input);
      QFETCH(QString, output);
 
-     AdBlockRule rule(input);
-     QCOMPARE(rule.regexpPattern(), output);
+     SubAdBlockRule rule(input);
+     QCOMPARE(rule.sub_regexpPattern(), output);
 }
-
 
 QTEST_MAIN(tst_AdBlockRule)
 #include "tst_adblockrule.moc"

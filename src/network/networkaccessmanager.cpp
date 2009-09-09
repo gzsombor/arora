@@ -69,6 +69,7 @@
 #include "cookiejar.h"
 #include "schemeaccesshandler.h"
 #include "fileaccesshandler.h"
+#include "networkaccesspolicy.h"
 #include "networkproxyfactory.h"
 #include "networkdiskcache.h"
 #include "networkaccesspolicy.h"
@@ -356,7 +357,7 @@ QNetworkReply *NetworkAccessManager::createRequest(QNetworkAccessManager::Operat
 
     QNetworkRequest req = request;
 #if QT_VERSION >= 0x040600
-    req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
+//    req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
 #endif
     if (!m_acceptLanguage.isEmpty())
         req.setRawHeader("Accept-Language", m_acceptLanguage);

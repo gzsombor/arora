@@ -19,6 +19,8 @@
 
 #include "filterselector.h"
 
+#include "adblockrule.h"
+
 #if defined(NETWORKACCESS_DEBUG)
 #include <qdebug.h>
 #endif
