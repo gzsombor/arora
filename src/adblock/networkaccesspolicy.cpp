@@ -118,39 +118,34 @@ bool NetworkAccessPolicy::importAdBlockRules(QIODevice &importFrom,  QList<AdBlo
     return NetworkAccessPolicy::importAdBlockRules(txt, rules);
 }
 
-bool NetworkAccessPolicy::importAdBlockRules(QTextStream &txt,  QList<AdBlockRule*> &rules)
+bool NetworkAccessPolicy::importAdBlockRules(QTextStream &textStream,  QList<AdBlockRule*> &rules)
 {
-    QString header = txt.readLine(1024);
-    if (!header.startsWith(QLatin1String("[Adblock"))) {
+    QString header = textStream.readLine(1024);
+    if (!header.startsWith(QLatin1String("[Adblock")))
         return false;
-    }
-    QString line;
+
     rules.clear();
-    do {
-        line = txt.readLine();
-        AdBlockRule *rule = new AdBlockRule(line);
-        if (rule) {
-#if defined(NETWORKACCESS_DEBUG)
-            qDebug() << rule->toString();
-#endif
-            rules.append(rule);
-        }
-    } while (!txt.atEnd());
+    while (!textStream.atEnd()) {
+        QString filter = textStream.readLine();
+        AdBlockRule *rule = new AdBlockRule(filter);
+        rules.append(rule);
+    }
 
     return true;
 }
 
-void NetworkAccessPolicy::exportSettings(QList<AdBlockRule*> &rules, QFile &fileToExport)
+void NetworkAccessPolicy::exportSettings(QList<AdBlockRule*> &rules, QFile &file)
 {
     Q_UNUSED(rules)
-    if (!fileToExport.open(QIODevice::WriteOnly)) {
-#if defined(NETWORKACCESS_DEBUG)
-        qDebug() << QLatin1String("Unable to open : ") << fileToExport.fileName();
-#endif
+    if (!file.open(QIODevice::WriteOnly)) {
+        qWarning() << QLatin1String("Unable to open file for writing: ") << file.fileName();
         return;
     }
-    QTextStream txt(&fileToExport);
-    txt << "[Adblock Plus 0.7.1]";
+
+    QTextStream textStream(&file);
+    textStream << "[Adblock Plus 0.7.1]";
+    foreach (const AdBlockRule *rule, rules)
+        textStream << rule->toString() << endl;
 }
 
 
@@ -162,7 +157,7 @@ const QList<AdBlockRule*> *NetworkAccessPolicy::accessRules() const
 void NetworkAccessPolicy::setAccessRules(QList<AdBlockRule*> &newRules)
 {
 #if defined(NETWORKACCESS_DEBUG)
-        qDebug() << "NetworkAccessPolicy::" << __FUNCTION__ << newRules.size();
+    qDebug() << "NetworkAccessPolicy::" << __FUNCTION__ << newRules.size();
 #endif
     m_rules->clear();
     m_rules->append(newRules);
@@ -174,10 +169,10 @@ void NetworkAccessPolicy::setAccessRules(QList<AdBlockRule*> &newRules)
 void NetworkAccessPolicy::setAccessRules(AdBlockSubscription *subscription, QList<AdBlockRule*> &newRules)
 {
 #if defined(NETWORKACCESS_DEBUG)
-        qDebug() << "setAccessRules for : " << subscription->name() << " len : " << newRules.size();
+    qDebug() << "setAccessRules for : " << subscription->name() << " len : " << newRules.size();
 #endif
 
-    for (int i= m_rules->size() - 1; i >= 0; --i) {
+    for (int i = m_rules->size() - 1; i >= 0; --i) {
         AdBlockRule *rule = m_rules->at(i);
         if (rule->subscription() == subscription)
             m_rules->removeAt(i);
