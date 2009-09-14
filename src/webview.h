@@ -82,6 +82,7 @@ class WebView : public QWebView
 
 public:
     WebView(QWidget *parent = 0);
+    ~WebView();
     WebPage *webPage() const { return m_page; }
 
 #if !(QT_VERSION >= 0x040600)
@@ -101,6 +102,10 @@ public:
     inline int progress() const { return m_progress; }
     TabWidget *tabWidget() const;
 
+    void displayScreenShot(const QPixmap &screenshot);
+    int lookBackItem();
+    void clearScreenShot() { m_screenshot = 0L; }
+    void addScreenShot(const QString &filename) { m_screenshotfiles << filename; }
 signals:
     void search(const QUrl &searchUrl, TabWidget::OpenUrlIn openIn);
 
@@ -109,6 +114,8 @@ public slots:
     void zoomOut();
     void resetZoom();
     void applyZoom();
+    void quickBack();
+    void quickForward();
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -154,6 +161,11 @@ private:
     QList<int> m_zoomLevels;
     WebPage *m_page;
 
+    void paintEvent(QPaintEvent *event);
+    QPixmap m_screenshot;
+    int m_width;
+    bool m_forward;
+
 #if QT_VERSION >= 0x040600 || defined(WEBKIT_TRUNK)
     bool m_enableAccessKeys;
     bool checkForAccessKey(QKeyEvent *event);
@@ -163,6 +175,8 @@ private:
     QHash<QChar, QWebElement> m_accessKeyNodes;
     bool m_accessKeysPressed;
 #endif
+    int m_quickhistorycurrentitem;
+    QStringList m_screenshotfiles;
 };
 
 #endif

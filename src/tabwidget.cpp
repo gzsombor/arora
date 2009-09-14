@@ -83,16 +83,19 @@
 
 #include <qcompleter.h>
 #include <qdir.h>
+#include <qdesktopservices.h>
 #include <qevent.h>
 #include <qlistview.h>
 #include <qmenu.h>
 #include <qmessagebox.h>
 #include <qmovie.h>
+#include <qpainter.h>
 #include <qsettings.h>
 #include <qstackedwidget.h>
 #include <qstyle.h>
 #include <qtoolbutton.h>
 #include <qwebhistory.h>
+#include <qwebframe.h>
 
 #include <qdebug.h>
 
@@ -678,6 +681,20 @@ void TabWidget::webViewLoadFinished(bool ok)
         emit showStatusBarMessage(tr("Finished loading"));
     else
         emit showStatusBarMessage(tr("Failed to load"));
+
+
+    QString directory = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+    QWebPage *page = webView->page();
+    QImage image(page->viewportSize(), QImage::Format_ARGB32);
+    QPainter painter(&image);
+    page->mainFrame()->render(&painter);
+    painter.end();
+    QString filename = QString(QLatin1String("%1/%2.png"))
+                                  .arg(directory)
+                                  .arg(webView->page()->mainFrame()->url().toString().replace(QLatin1String("/"),QLatin1String("")));
+    image.save(filename);
+    webView->addScreenShot(filename);
+
 }
 
 void TabWidget::webViewIconChanged()

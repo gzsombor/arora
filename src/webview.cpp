@@ -81,10 +81,13 @@
 
 #include <qclipboard.h>
 #include <qdebug.h>
+#include <qdesktopservices.h>
 #include <qevent.h>
 #include <qmenubar.h>
+#include <qpainter.h>
 #include <qtimer.h>
 #include <qwebframe.h>
+#include <qwebhistory.h>
 
 #if QT_VERSION >= 0x040600 || defined(WEBKIT_TRUNK)
 #if !defined(QTWEBKIT_VERSION) || QTWEBKIT_VERSION < 0x020000
@@ -110,6 +113,7 @@ WebView::WebView(QWidget *parent)
     , m_enableAccessKeys(true)
     , m_accessKeysPressed(false)
 #endif
+    , m_screenshot()
 {
     setPage(m_page);
 #if QT_VERSION >= 0x040600
@@ -146,6 +150,15 @@ WebView::WebView(QWidget *parent)
             this, SLOT(hideAccessKeys()));
 #endif
     loadSettings();
+}
+
+WebView::~WebView()
+{
+    QStringListIterator iter(m_screenshotfiles);
+    while (iter.hasNext()) {
+        QFile file(iter.next());
+        file.remove();
+    }
 }
 
 void WebView::loadSettings()
@@ -575,6 +588,8 @@ void WebView::loadFinished()
     m_progress = 0;
     AdBlockManager::instance()->page()->applyRulesToPage(page());
     BrowserApplication::instance()->autoFillManager()->fill(page());
+
+    m_quickhistorycurrentitem = history()->currentItemIndex();
 }
 
 void WebView::loadUrl(const QUrl &url, const QString &title)
@@ -908,3 +923,99 @@ void WebView::makeAccessKeyLabel(const QChar &accessKey, const QWebElement &elem
 }
 
 #endif
+
+void WebView::displayScreenShot(const QPixmap &screenshot)
+{
+    m_screenshot = screenshot;
+    update();
+}
+
+void WebView::paintEvent(QPaintEvent *event)
+{
+    if (!m_screenshot.isNull()) {
+        QPixmap toaster;
+        m_width += 100;
+        QPainter painter(this);
+
+        int tx = x();
+        if (m_width < width()) {
+            tx = (width() - m_width);
+            if (m_forward)
+                toaster = m_screenshot.copy(QRect(x(), y(), m_width, height()));
+            else
+                toaster = m_screenshot.copy(QRect(tx, y(), m_width, height()));
+            QTimer::singleShot(20, this, SLOT(update()));
+        } else
+            toaster = m_screenshot;
+        if (m_forward)
+            painter.drawPixmap(QPoint(tx,y()), toaster);
+        else
+            painter.drawPixmap(QPoint(x(),y()), toaster);
+        if (m_quickhistorycurrentitem >= (history()->count() - 1) && (toaster.width() == m_screenshot.width())) {
+          m_screenshot = 0L;
+          m_quickhistorycurrentitem = history()->count() - 1;
+          return;
+        }
+
+        return;
+    }
+
+    QWebView::paintEvent(event);
+}
+
+void WebView::quickBack()
+{
+    if (m_quickhistorycurrentitem == 0)
+        return;
+
+    m_quickhistorycurrentitem--;
+    m_width = 0;
+    m_forward = false;
+
+    QString urlString = history()->items().at(m_quickhistorycurrentitem).url().toString();
+    QString directory = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+    QString filename = QString(QLatin1String("%1/%2.png"))
+                                  .arg(directory)
+                                  .arg(urlString.replace(QLatin1String("/"),QLatin1String("")));
+
+    QPixmap screenshot;
+    bool loaded = screenshot.load(filename);
+
+    displayScreenShot(screenshot);
+
+    qDebug() << "quick screenshot " << filename;
+    qDebug() << "loaded " << loaded;
+
+}
+
+void WebView::quickForward()
+{
+    qDebug() << "m_quickhistorycurrentitem " << m_quickhistorycurrentitem;
+    qDebug() << "history()->items().count() " << history()->items().count();
+     if (m_quickhistorycurrentitem  >= (history()->items().count() - 1)) {
+         return;
+    }
+
+    m_width = 0;
+    m_forward = true;
+    m_quickhistorycurrentitem++;
+
+    QString urlString = history()->items().at(m_quickhistorycurrentitem).url().toString();
+    QString directory = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+    QString filename = QString(QLatin1String("%1/%2.png"))
+                                  .arg(directory)
+                                  .arg(urlString.replace(QLatin1String("/"),QLatin1String("")));
+
+    QPixmap screenshot;
+    bool loaded = screenshot.load(filename);
+
+    displayScreenShot(screenshot);
+
+    qDebug() << "quick screenshot " << filename;
+    qDebug() << "loaded " << loaded;
+}
+
+int WebView::lookBackItem()
+{
+    return m_quickhistorycurrentitem;
+}

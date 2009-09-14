@@ -1,3 +1,22 @@
+Quickflick
+
+This feature proposal allows the user to flick quickly back and forth through their
+browsing history. The action of flicking is performed using CTRL+ALT and the left and right
+arrow buttons.
+
+A 'flick' consists of the item in history sliding in from the left of the screen (back) or
+the right of the screen (forward). Once the user has found the page in their history they
+wish to nagivate to, they release the CTRL+ALT keys and Arora loads that page.
+
+The approach has a number of advantages over conventional history navigation:
+
+  - The user can visually identify the page they are loading from history before nagivating to it.
+    This is more intuitive and reliable than identifying the page from the url/title.
+  - Navigating several pages back in the history is less time-consuming.
+  - When completing multi-page forms the user can review their input on previous pages without interrupting work
+    on the current page.
+
+---------------------
 Arora web browser
 
 http://www.arora-browser.org

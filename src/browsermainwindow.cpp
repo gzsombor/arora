@@ -89,6 +89,7 @@
 #include "webview.h"
 #include "webviewsearch.h"
 
+#include <qdesktopservices.h>
 #include <qdesktopwidget.h>
 #include <qevent.h>
 #include <qfiledialog.h>
@@ -735,12 +736,24 @@ void BrowserMainWindow::setupMenu()
     m_historyBackAction->setIconVisibleInMenu(false);
 #endif
 
+    m_historyQuickBackAction = new QAction(this);
+    m_historyQuickBackAction->setShortcut(QKeySequence(Qt::AltModifier | Qt::ControlModifier | Qt::Key_Left));
+    m_historyQuickBackAction->setIconVisibleInMenu(false);
+    connect(m_historyQuickBackAction, SIGNAL(triggered()),
+            this, SLOT(quickBack()));
+
     m_historyForwardAction = new QAction(this);
     m_tabWidget->addWebAction(m_historyForwardAction, QWebPage::Forward);
     m_historyForwardAction->setShortcuts(QKeySequence::Forward);
 #if QT_VERSION < 0x040600 || (QT_VERSION >= 0x040600 && !defined(Q_WS_X11))
     m_historyForwardAction->setIconVisibleInMenu(false);
 #endif
+
+    m_historyQuickForwardAction = new QAction(this);
+    m_historyQuickForwardAction->setShortcut(QKeySequence(Qt::AltModifier | Qt::ControlModifier | Qt::Key_Right));
+    m_historyQuickForwardAction->setIconVisibleInMenu(false);
+    connect(m_historyQuickForwardAction, SIGNAL(triggered()),
+            this, SLOT(quickForward()));
 
     m_historyHomeAction = new QAction(this);
     connect(m_historyHomeAction, SIGNAL(triggered()), this, SLOT(goHome()));
@@ -752,7 +765,9 @@ void BrowserMainWindow::setupMenu()
     m_historyRestoreLastSessionAction->setEnabled(BrowserApplication::instance()->canRestoreSession());
 
     historyActions.append(m_historyBackAction);
+    historyActions.append(m_historyQuickBackAction);
     historyActions.append(m_historyForwardAction);
+    historyActions.append(m_historyQuickForwardAction);
     historyActions.append(m_historyHomeAction);
     historyActions.append(m_tabWidget->recentlyClosedTabsAction());
     historyActions.append(m_historyRestoreLastSessionAction);
@@ -1588,4 +1603,37 @@ void BrowserMainWindow::geometryChangeRequested(const QRect &geometry)
 {
     setGeometry(geometry);
 }
+
+void BrowserMainWindow::quickBack()
+{
+    if (!currentTab())
+        return;
+
+    m_lookback = true;
+    currentTab()->quickBack();
+
+}
+
+void BrowserMainWindow::quickForward()
+{
+    if (!currentTab())
+        return;
+    m_lookback = true;
+    currentTab()->quickForward();
+}
+
+void BrowserMainWindow::keyReleaseEvent ( QKeyEvent * event ) {
+    if ((event->key() == Qt::Key_Alt) && m_lookback) {
+        qDebug() << "improper key release event " << endl;
+        qDebug() << currentTab()->lookBackItem() << endl;
+        m_lookback = false;
+        QWebHistory *history = currentTab()->history();
+        currentTab()->clearScreenShot();
+        if (currentTab()->lookBackItem() != history->currentItemIndex())
+            history->goToItem(history->items().at(currentTab()->lookBackItem()));
+        event->accept();
+        return;
+    }
+    event->ignore();
+};
 

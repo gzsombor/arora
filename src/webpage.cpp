@@ -36,6 +36,7 @@
 #include <qmessagebox.h>
 #include <qnetworkreply.h>
 #include <qnetworkrequest.h>
+#include <qpainter.h>
 #include <qsettings.h>
 #include <qwebframe.h>
 
@@ -298,6 +299,19 @@ bool WebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &r
 
     bool accepted = QWebPage::acceptNavigationRequest(frame, request, type);
     if (accepted && frame == mainFrame()) {
+        QString directory = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+        QImage image(viewportSize(), QImage::Format_ARGB32);
+        QPainter painter(&image);
+        mainFrame()->render(&painter);
+        painter.end();
+
+        QString filename = QString(QLatin1String("%1/%2.png"))
+                                      .arg(directory)
+                                      .arg(mainFrame()->url().toString().replace(QLatin1String("/"),QLatin1String("")));
+        image.save(filename);
+        WebView *webView = qobject_cast<WebView*>(view());
+        webView->addScreenShot(filename);
+
         m_requestedUrl = request.url();
         emit aboutToLoadUrl(request.url());
     }
