@@ -67,6 +67,7 @@
 #include <qaction.h>
 #include <qapplication.h>
 #include <qclipboard.h>
+#include <qdebug.h>
 #include <qevent.h>
 #include <qmenu.h>
 #include <qstyle.h>
@@ -89,6 +90,7 @@ TabBar::TabBar(QWidget *parent)
     : QTabBar(parent)
     , m_viewTabBarAction(0)
     , m_showTabBarWhenOneTab(true)
+    , m_oldIndex(0)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
     setAcceptDrops(true);
@@ -343,3 +345,47 @@ void TabBar::updateVisibility()
     updateViewToolBarAction();
 }
 
+void TabBar::wheelEvent(QWheelEvent *event)
+{
+//    if (event->modifiers() & Qt::ControlModifier) {
+        int index = tabAt(event->pos());
+        int numDegrees = event->delta() / 8;
+        int numSteps = numDegrees / 15;
+        QRect rect = tabRect(index);
+
+        emit rotateThumb(numSteps, index, rect.x());
+        event->accept();
+        return;
+//    }
+    QTabBar::wheelEvent(event);
+}
+
+void TabBar::enterEvent(QEvent *event)
+{
+    int index = tabAt(QWidget::mapFromGlobal(QCursor::pos()));
+    QRect rect = tabRect(index);
+    emit displayThumb(index, rect.x());
+    event->accept();
+}
+
+void TabBar::leaveEvent(QEvent *event)
+{
+    emit clearThumb(m_oldIndex);
+    event->accept();
+}
+
+bool TabBar::event(QEvent *event)
+{
+    if (event->type() == QEvent::HoverMove
+        || event->type() == QEvent::HoverEnter) {
+        QHoverEvent *he = static_cast<QHoverEvent *>(event);
+        int index = tabAt(he->pos());
+        if (index != -1 && index != m_oldIndex) {
+            emit clearThumb(m_oldIndex);
+            QRect rect = tabRect(index);
+            emit displayThumb(index, rect.x());
+            m_oldIndex = index;
+        }
+    }
+    return QTabBar::event(event);
+}

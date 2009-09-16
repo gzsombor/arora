@@ -1,3 +1,13 @@
+Tab History Flicking
+
+This builds on the work in http://github.com/mwenge/torora/tree/screenhistory.
+
+Thumbnails of the screens contained in hidden tabs pop down when you hover over
+the tab. You can then flick through a thumbnail history of the tab using the
+mouse wheel. Clicking the tab will load the page presented by the thumbnail.
+
+
+--------------
 Quickflick
 
 This feature proposal allows the user to flick quickly back and forth through their

@@ -106,6 +106,11 @@ public:
     int lookBackItem();
     void clearScreenShot() { m_screenshot = 0L; }
     void addScreenShot(const QString &filename) { m_screenshotfiles << filename; }
+    QPixmap currentScreenImage();
+    void clearThumb();
+    void loadLookBackItem();
+    void resetQuickHistory();
+
 signals:
     void search(const QUrl &searchUrl, TabWidget::OpenUrlIn openIn);
 
@@ -114,8 +119,9 @@ public slots:
     void zoomOut();
     void resetZoom();
     void applyZoom();
-    void quickBack();
-    void quickForward();
+    bool quickBack();
+    bool quickForward();
+    void displayThumb(const QPixmap &thumb, int x);
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -163,8 +169,11 @@ private:
 
     void paintEvent(QPaintEvent *event);
     QPixmap m_screenshot;
+    QPixmap m_thumbnail;
     int m_width;
+    int m_height;
     bool m_forward;
+    int m_thumbx;
 
 #if QT_VERSION >= 0x040600 || defined(WEBKIT_TRUNK)
     bool m_enableAccessKeys;

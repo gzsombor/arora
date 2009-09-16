@@ -114,6 +114,7 @@ WebView::WebView(QWidget *parent)
     , m_accessKeysPressed(false)
 #endif
     , m_screenshot()
+    , m_quickhistorycurrentitem(0)
 {
     setPage(m_page);
 #if QT_VERSION >= 0x040600
@@ -954,68 +955,120 @@ void WebView::paintEvent(QPaintEvent *event)
         if (m_quickhistorycurrentitem >= (history()->count() - 1) && (toaster.width() == m_screenshot.width())) {
           m_screenshot = 0L;
           m_quickhistorycurrentitem = history()->count() - 1;
+          event->accept();
           return;
         }
-
+        event->accept();
         return;
     }
 
+    if (!m_thumbnail.isNull()) {
+        QPixmap toaster;
+        m_height += 50;
+        QPainter painter(this);
+        painter.setPen(Qt::white);
+
+        if (m_height < m_thumbnail.height()) {
+            int ty = (m_thumbnail.height() - m_height);
+            toaster = m_thumbnail.copy(QRect(0, ty, m_thumbnail.width(), m_height));
+            QTimer::singleShot(20, this, SLOT(update()));
+        } else
+            toaster = m_thumbnail;
+
+        painter.setBrush(palette().color(QPalette::Background));
+        painter.drawRoundedRect(QRect(m_thumbx - 10, y() - 10, m_thumbnail.width() + 15, m_height - 5), 10, 10);
+        QPen pen(Qt::white);
+        pen.setWidth(1);
+        painter.setPen(pen);
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRoundedRect(QRect(m_thumbx - 10, y() - 10, m_thumbnail.width() + 12, m_height - 8), 10, 10);
+
+        painter.drawPixmap(QPoint(m_thumbx, y()), toaster);
+        event->accept();
+        return;
+    }
     QWebView::paintEvent(event);
 }
 
-void WebView::quickBack()
+bool WebView::quickBack()
 {
     if (m_quickhistorycurrentitem == 0)
-        return;
+        return false;
 
     m_quickhistorycurrentitem--;
     m_width = 0;
     m_forward = false;
 
-    QString urlString = history()->items().at(m_quickhistorycurrentitem).url().toString();
-    QString directory = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-    QString filename = QString(QLatin1String("%1/%2.png"))
-                                  .arg(directory)
-                                  .arg(urlString.replace(QLatin1String("/"),QLatin1String("")));
-
     QPixmap screenshot;
-    bool loaded = screenshot.load(filename);
+    screenshot = currentScreenImage();
 
     displayScreenShot(screenshot);
-
-    qDebug() << "quick screenshot " << filename;
-    qDebug() << "loaded " << loaded;
-
+    return true;
 }
 
-void WebView::quickForward()
+bool WebView::quickForward()
 {
     qDebug() << "m_quickhistorycurrentitem " << m_quickhistorycurrentitem;
     qDebug() << "history()->items().count() " << history()->items().count();
-     if (m_quickhistorycurrentitem  >= (history()->items().count() - 1)) {
-         return;
+    if (m_quickhistorycurrentitem  >= (history()->items().count() - 1)) {
+         return false;
     }
 
     m_width = 0;
     m_forward = true;
     m_quickhistorycurrentitem++;
 
-    QString urlString = history()->items().at(m_quickhistorycurrentitem).url().toString();
-    QString directory = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-    QString filename = QString(QLatin1String("%1/%2.png"))
-                                  .arg(directory)
-                                  .arg(urlString.replace(QLatin1String("/"),QLatin1String("")));
-
     QPixmap screenshot;
-    bool loaded = screenshot.load(filename);
+    screenshot = currentScreenImage();
 
     displayScreenShot(screenshot);
-
-    qDebug() << "quick screenshot " << filename;
-    qDebug() << "loaded " << loaded;
+    return true;
 }
 
 int WebView::lookBackItem()
 {
     return m_quickhistorycurrentitem;
+}
+
+QPixmap WebView::currentScreenImage()
+{
+    if (!history()->items().count())
+        return QPixmap();
+    QString urlString = history()->items().at(m_quickhistorycurrentitem).url().toString();
+    QString directory = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+    QString filename = QString(QLatin1String("%1/%2.png"))
+                                  .arg(directory)
+                                  .arg(urlString.replace(QLatin1String("/"),QLatin1String("")));
+    QPixmap screenshot;
+    bool loaded = screenshot.load(filename);
+    return screenshot;
+}
+
+void WebView::displayThumb(const QPixmap &thumb, int x)
+{
+    m_height = 0;
+    m_thumbnail = thumb;
+    m_thumbx = x;
+    update();
+}
+
+void WebView::clearThumb()
+{
+    m_thumbnail = 0L;
+    repaint();
+}
+
+void WebView::loadLookBackItem()
+{
+    if (lookBackItem() != history()->currentItemIndex())
+        history()->goToItem(history()->items().at(lookBackItem()));
+//    m_screenshot = 0L;
+    m_thumbnail = 0L;
+}
+
+void WebView::resetQuickHistory()
+{
+    m_quickhistorycurrentitem  = history()->currentItemIndex();
+    m_screenshot = 0L;
+    update();
 }

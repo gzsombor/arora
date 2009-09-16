@@ -129,6 +129,9 @@ TabWidget::TabWidget(QWidget *parent)
     connect(m_tabBar, SIGNAL(closeOtherTabs(int)), this, SLOT(closeOtherTabs(int)));
     connect(m_tabBar, SIGNAL(reloadTab(int)), this, SLOT(reloadTab(int)));
     connect(m_tabBar, SIGNAL(reloadAllTabs()), this, SLOT(reloadAllTabs()));
+    connect(m_tabBar, SIGNAL(displayThumb(int, int)), this, SLOT(displayThumb(int, int)));
+    connect(m_tabBar, SIGNAL(rotateThumb(int, int, int)), this, SLOT(rotateThumb(int, int, int)));
+    connect(m_tabBar, SIGNAL(clearThumb(int)), this, SLOT(clearThumb(int)));
     setTabBar(m_tabBar);
     setDocumentMode(true);
     connect(m_tabBar, SIGNAL(tabMoved(int, int)),
@@ -280,6 +283,9 @@ void TabWidget::currentChanged(int index)
     } else if (!webView->url().isEmpty()) {
         webView->setFocus();
     }
+
+    webView->loadLookBackItem();
+
 }
 
 QAction *TabWidget::newTabAction() const
@@ -1126,3 +1132,53 @@ void TabWidget::createTab(const QByteArray &historyState, TabWidget::OpenUrlIn t
 #endif
 }
 
+void TabWidget::displayThumb(int index, int x)
+{
+    if (index < 0)
+        index = currentIndex();
+    if (index < 0 || index >= count())
+        return;
+    if (index == currentIndex())
+        return;
+  
+    if (WebView *tab = webView(index)) {
+        WebView *currentTab = webView(currentIndex());
+        QPixmap image = tab->currentScreenImage();
+        int height = image.height() / 3;
+        int width = image.width() / 3;
+        currentTab->displayThumb(image.scaled(width,height), x);
+    }
+}
+
+void TabWidget::rotateThumb(int numSteps, int index, int x)
+{
+    if (index < 0)
+        index = currentIndex();
+    if (index < 0 || index >= count())
+        return;
+    if (index == currentIndex())
+        return;
+
+    if (WebView *tab = webView(index)) {
+        bool moved;
+        if (numSteps < 0)
+          moved = tab->quickBack();
+        else
+          moved = tab->quickForward();
+        if (moved) {
+            WebView *currentTab = webView(currentIndex());
+            QPixmap image = tab->currentScreenImage();
+            int height = image.height() / 3;
+            int width = image.width() / 3;
+            currentTab->displayThumb(image.scaled(width,height), x);
+        }
+    }
+}
+
+void TabWidget::clearThumb(int index)
+{
+   WebView *currentTab = webView(currentIndex());
+   currentTab->clearThumb();
+   if (WebView *tab = webView(index))
+      tab->resetQuickHistory();
+}

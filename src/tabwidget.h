@@ -165,6 +165,9 @@ public slots:
     void nextTab();
     void previousTab();
     void bookmarkTabs();
+    void displayThumb(int index, int x);
+    void rotateThumb(int numSteps, int index, int x);
+    void clearThumb(int index);
 
 private slots:
     void currentChanged(int index);

@@ -1629,8 +1629,7 @@ void BrowserMainWindow::keyReleaseEvent ( QKeyEvent * event ) {
         m_lookback = false;
         QWebHistory *history = currentTab()->history();
         currentTab()->clearScreenShot();
-        if (currentTab()->lookBackItem() != history->currentItemIndex())
-            history->goToItem(history->items().at(currentTab()->lookBackItem()));
+        currentTab()->loadLookBackItem();
         event->accept();
         return;
     }

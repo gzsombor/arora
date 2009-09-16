@@ -82,6 +82,9 @@ signals:
     void reloadTab(int index);
     void reloadAllTabs();
     void loadUrl(const QUrl &url, TabWidget::OpenUrlIn tab);
+    void displayThumb(int index, int x);
+    void rotateThumb(int index, int numSteps, int x);
+    void clearThumb(int index);
 
 public:
     TabBar(QWidget *parent = 0);
@@ -111,14 +114,19 @@ private slots:
     void contextMenuRequested(const QPoint &position);
     void updateViewToolBarAction();
     void viewTabBar();
+    bool event(QEvent *event);
 
 private:
     void updateVisibility();
     friend class TabWidget;
+    void wheelEvent(QWheelEvent *event);
+    void enterEvent(QEvent *event);
+    void leaveEvent(QEvent *event);
 
     QPoint m_dragStartPos;
     QAction *m_viewTabBarAction;
     bool m_showTabBarWhenOneTab;
+    int m_oldIndex;
 };
 
 
