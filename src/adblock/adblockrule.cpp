@@ -87,8 +87,8 @@ void AdBlockRule::setFilter(const QString &filter)
         parsedLine = parsedLine.mid(2);
     }
     if (parsedLine.startsWith(QLatin1Char('/'))) {
-        parsedLine = parsedLine.mid(1);
         if (parsedLine.endsWith(QLatin1Char('/'))) {
+            parsedLine = parsedLine.mid(1);
             parsedLine = parsedLine.left(parsedLine.size() - 1);
             regExpRule = true;
         }
