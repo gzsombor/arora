@@ -303,6 +303,18 @@ void tst_AdBlockRule::networkMatch_data()
     QTest::newRow("i0") << QString("||snap.com^$third-party")
                         << QUrl("http://spa.snap.com/snap_preview_anywhere.js?ap=1&key=89743df349c6c38afc3094e9566cb98e&sb=1&link_icon=off&domain=pub-6332280-www.techcrunch.com")
                         << true;
+
+    QTest::newRow("i1") << QString("|http://ads.")
+                        << QUrl("http://ads.cnn.com/html.ng/site=cnn&cnn_pagetype=main&cnn_position=336x280_adlinks&cnn_rollup=homepage&page.allowcompete=yes&params.styles=fs&tile=8837285713521&domId=463050")
+                        << true;
+
+    QTest::newRow("i2") << QString("/adverti$~object_subrequest,~stylesheet,domain=~advertise4free.org|~amarillas.cl|~bnet.com|~catalysttelecom.com|~cod4central.com|~scansource.com|~scansourcecommunications.com|~scansourcesecurity.com")
+                        << QUrl("http://i2.cdn.turner.com/cnn/.element/img/2.0/content/ads/advertisement.gif")
+                        << true;
+
+    QTest::newRow("i3") << QString("/adspace")
+                        << QUrl("http://i.cdn.turner.com/cnn/cnn_adspaces/cnn_adspaces.js")
+                        << false;
 }
 
 // public bool networkMatch(const QUrl &url) const
