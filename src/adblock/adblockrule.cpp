@@ -56,6 +56,7 @@
 // #define ADBLOCKRULE_DEBUG
 
 AdBlockRule::AdBlockRule(const QString &filter)
+        : m_hitCount(0)
 {
     setFilter(filter);
 }
@@ -140,10 +141,10 @@ bool AdBlockRule::networkMatch(const QString &encodedUrl) const
                         if (negate)
                             domainOption = domainOption.mid(1);
                         bool hostMatched = domainOption == host;
-                        if (hostMatched && !negate)
+                        if (hostMatched != negate) {
+                            incHitCount();
                             return true;
-                        if (!hostMatched && negate)
-                            return true;
+                        }
                     }
                 }
             }
@@ -157,7 +158,9 @@ bool AdBlockRule::networkMatch(const QString &encodedUrl) const
 #if defined(ADBLOCKRULE_DEBUG)
     //qDebug() << "AdBlockRule::" << __FUNCTION__ << encodedUrl << "MATCHED" << matched << filter();
 #endif
-
+    if (matched) {
+        incHitCount();
+    }
     return matched;
 }
 
@@ -185,6 +188,22 @@ void AdBlockRule::setEnabled(bool enabled)
         m_filter = m_filter.mid(1);
     }
 }
+
+int AdBlockRule::hitCount() const
+{
+    return m_hitCount;
+}
+
+void AdBlockRule::setHitCount(int hitcount)
+{
+    m_hitCount = hitcount;
+}
+
+void AdBlockRule::incHitCount() const
+{
+    m_hitCount++;
+}
+
 
 QString AdBlockRule::regExpPattern() const
 {

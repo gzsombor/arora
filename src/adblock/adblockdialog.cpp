@@ -64,6 +64,10 @@ AdBlockDialog::AdBlockDialog(QWidget *parent)
 
     AdBlockSubscription *subscription = manager->customRules();
     QModelIndex subscriptionIndex = m_adBlockModel->index(subscription);
+    treeView->header()->setResizeMode(0, QHeaderView::ResizeToContents);
+    treeView->header()->setResizeMode(1, QHeaderView::ResizeToContents);
+
+
     treeView->expand(m_proxyModel->mapFromSource(subscriptionIndex));
 }
 

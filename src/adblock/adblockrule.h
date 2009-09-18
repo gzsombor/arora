@@ -51,6 +51,10 @@ public:
     bool isEnabled() const;
     void setEnabled(bool enabled);
 
+    int hitCount() const;
+    void setHitCount(int hitcount);
+    void incHitCount() const;
+
     QString regExpPattern() const;
     void setPattern(const QString &pattern, bool isRegExp);
 
@@ -60,6 +64,7 @@ private:
     bool m_cssRule;
     bool m_exception;
     bool m_enabled;
+    mutable int m_hitCount;
     QRegExp m_regExp;
     QStringList m_options;
 };

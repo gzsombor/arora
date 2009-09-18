@@ -75,6 +75,7 @@ QVariant AdBlockModel::headerData(int section, Qt::Orientation orientation, int 
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
         switch (section) {
         case 0: return tr("Rule");
+        case 1: return tr("Hits");
         }
     }
     return QAbstractItemModel::headerData(section, orientation, role);
@@ -84,7 +85,8 @@ QVariant AdBlockModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid()
         || index.model() != this
-        || index.column() != 0)
+        || index.column() < 0
+        || index.column() > 1)
         return QVariant();
 
     switch (role) {
@@ -92,21 +94,27 @@ QVariant AdBlockModel::data(const QModelIndex &index, int role) const
     case Qt::DisplayRole:
         if (index.parent().isValid()) {
             const AdBlockRule r = rule(index);
-            return r.filter();
+            switch (index.column()) {
+            case 0 : return r.filter();
+            case 1 : return r.hitCount();
+            }
+
         } else {
             AdBlockSubscription *sub = subscription(index);
-            if (sub)
+            if (sub && index.column() == 0)
                 return sub->title();
         }
         break;
     case Qt::CheckStateRole:
-        if (index.parent().isValid()) {
-            const AdBlockRule r = rule(index);
-            return r.isEnabled() ? Qt::Checked : Qt::Unchecked;
-        } else {
-            AdBlockSubscription *sub = subscription(index);
-            if (sub)
-                return sub->isEnabled() ? Qt::Checked : Qt::Unchecked;
+        if (index.column() == 0) {
+            if (index.parent().isValid()) {
+                const AdBlockRule r = rule(index);
+                return r.isEnabled() ? Qt::Checked : Qt::Unchecked;
+            } else {
+                AdBlockSubscription *sub = subscription(index);
+                if (sub)
+                    return sub->isEnabled() ? Qt::Checked : Qt::Unchecked;
+            }
         }
         break;
     default:
@@ -118,7 +126,7 @@ QVariant AdBlockModel::data(const QModelIndex &index, int role) const
 
 int AdBlockModel::columnCount(const QModelIndex &parent) const
 {
-    return (parent.column() > 0) ? 0 : 1;
+    return (parent.column() > 0) ? 0 : 2;
 }
 
 int AdBlockModel::rowCount(const QModelIndex &parent) const
