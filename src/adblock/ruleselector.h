@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2009, Benjamin C. Meyer <ben@meyerhome.net>
+ * Copyright (c) 2009, Zsombor Gegesy <gzsombor@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,48 +26,29 @@
  * SUCH DAMAGE.
  */
 
-#ifndef ADBLOCKRULE_H
-#define ADBLOCKRULE_H
+#ifndef RULESELECTOR_H
+#define RULESELECTOR_H
 
-#include <qstringlist.h>
+#include <qobject.h>
+#include <qlist.h>
+#include <qhash.h>
 
-class QUrl;
-class QRegExp;
+#include "adblockrule.h"
 
-class AdBlockRule
+class RuleSelector : QObject
 {
+    Q_OBJECT
 
 public:
-    AdBlockRule(const QString &filter = QString());
+    RuleSelector(QObject *parent = 0);
 
-    QString filter() const;
-    void setFilter(const QString &filter);
+    const AdBlockRule *get(const QString &url) const;
 
-    bool isCSSRule() const { return m_cssRule; }
-    bool networkMatch(const QString &encodedUrl) const;
-
-    bool isException() const;
-    void setException(bool exception);
-
-    bool isEnabled() const;
-    void setEnabled(bool enabled);
-
-    QString pattern() const;
-    QString regExpPattern() const;
-    bool isRegexp() const { return m_regexpRule; }
-    void setPattern(const QString &pattern, bool isRegExp);
+    void rehash(QList<const AdBlockRule*> &rules, bool exceptionRules);
 
 private:
-    QString m_filter;
-    QString m_pattern;
-
-    bool m_cssRule;
-    bool m_exception;
-    bool m_enabled;
-    bool m_regexpRule;
-    QRegExp m_regExp;
-    QStringList m_options;
+    QHash<QString, const AdBlockRule*> m_ruleHash;
+    QList<const AdBlockRule*> m_extraRules;
 };
 
-#endif // ADBLOCKRULE_H
-
+#endif // RULESELECTOR_H

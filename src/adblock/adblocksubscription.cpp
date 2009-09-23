@@ -38,6 +38,7 @@
 #include <qtextstream.h>
 
 // #define ADBLOCKSUBSCRIPTION_DEBUG
+// #define ADBLOCK_LINEAR_SEARCH
 
 AdBlockSubscription::AdBlockSubscription(const QUrl &url, QObject *parent)
     : QObject(parent)
@@ -295,20 +296,28 @@ QList<const AdBlockRule*> AdBlockSubscription::pageRules() const
 
 const AdBlockRule *AdBlockSubscription::allow(const QString &urlString) const
 {
+#if defined(ADBLOCK_LINEAR_SEARCH)
     foreach (const AdBlockRule *rule, m_networkExceptionRules) {
         if (rule->networkMatch(urlString))
             return rule;
     }
     return 0;
+#else
+    return m_networkExceptionRuleSelector.get(urlString);
+#endif
 }
 
 const AdBlockRule *AdBlockSubscription::block(const QString &urlString) const
 {
+#if defined(ADBLOCK_LINEAR_SEARCH)
     foreach (const AdBlockRule *rule, m_networkBlockRules) {
         if (rule->networkMatch(urlString))
             return rule;
     }
     return 0;
+#else
+    return m_networkBlockRuleSelector.get(urlString);
+#endif
 }
 
 QList<AdBlockRule> AdBlockSubscription::allRules() const
@@ -371,5 +380,7 @@ void AdBlockSubscription::populateCache()
             m_networkBlockRules.append(rule);
         }
     }
+    m_networkExceptionRuleSelector.rehash(m_networkExceptionRules, true);
+    m_networkBlockRuleSelector.rehash(m_networkBlockRules, false);
 }
 
