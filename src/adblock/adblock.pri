@@ -10,7 +10,8 @@ HEADERS += \
     adblockpage.h \
     adblockrule.h \
     adblockschemeaccesshandler.h \
-    adblocksubscription.h
+    adblocksubscription.h \
+    ruleselector.h
 
 SOURCES += \
     adblockblockednetworkreply.cpp \
@@ -21,7 +22,8 @@ SOURCES += \
     adblockpage.cpp \
     adblockrule.cpp \
     adblockschemeaccesshandler.cpp \
-    adblocksubscription.cpp
+    adblocksubscription.cpp \
+    ruleselector.cpp
 
 FORMS += \
     adblockdialog.ui

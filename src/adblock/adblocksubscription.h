@@ -32,6 +32,7 @@
 #include <qobject.h>
 
 #include "adblockrule.h"
+#include "ruleselector.h"
 
 #include <qlist.h>
 #include <qdatetime.h>
@@ -96,6 +97,9 @@ private:
     QList<const AdBlockRule*> m_networkExceptionRules;
     QList<const AdBlockRule*> m_networkBlockRules;
     QList<const AdBlockRule*> m_pageRules;
+
+    RuleSelector m_networkBlockRuleSelector;
+    RuleSelector m_networkExceptionRuleSelector;
 };
 
 #endif // ADBLOCKSUBSCRIPTION_H

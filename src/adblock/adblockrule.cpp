@@ -192,7 +192,13 @@ static QString convertPatternToRegExp(const QString &wildcardPattern) {
 
 void AdBlockRule::setPattern(const QString &pattern, bool isRegExp)
 {
+    m_pattern = pattern;
+    m_regexpRule = isRegExp;
     m_regExp = QRegExp(isRegExp ? pattern : convertPatternToRegExp(pattern),
                            Qt::CaseInsensitive, QRegExp::RegExp2);
 }
 
+QString AdBlockRule::pattern() const
+{
+    return m_pattern;
+}
