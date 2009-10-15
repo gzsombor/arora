@@ -963,6 +963,7 @@ void WebView::paintEvent(QPaintEvent *event)
     }
 
     if (!m_thumbnail.isNull()) {
+        // qDebug() << "m_thumbnail painting ...";
         QPixmap toaster;
         m_height += 50;
         QPainter painter(this);
@@ -1035,17 +1036,48 @@ QPixmap WebView::currentScreenImage()
     if (!history()->items().count())
         return QPixmap();
     QString urlString = history()->items().at(m_quickhistorycurrentitem).url().toString();
-    QString directory = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-    QString filename = QString(QLatin1String("%1/%2.png"))
-                                  .arg(directory)
-                                  .arg(urlString.replace(QLatin1String("/"),QLatin1String("")));
+    QString filename = getScreenShotPath(urlString);
     QPixmap screenshot;
     bool loaded = screenshot.load(filename);
+    if (!loaded) {
+        // try to take a screenshot & save it ...
+        if (takeScreenShot()) {
+            // try again ...
+            screenshot.load(filename);
+        }
+    }
     return screenshot;
+}
+
+bool WebView::takeScreenShot()
+{
+    QImage image(m_page->viewportSize(), QImage::Format_ARGB32);
+    QPainter painter(&image);
+    m_page->mainFrame()->render(&painter);
+    painter.end();
+    QString filename = getScreenShotPath(m_page->mainFrame()->url().toString());
+    if (image.save(filename)) {
+        addScreenShot(filename);
+        return true;
+    }
+    return false;
+}
+
+QString WebView::getScreenShotPath(QString urlString)
+{
+    QString directory = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+    return QString(QLatin1String("%1/%2.png"))
+                                  .arg(directory)
+                                  .arg(urlString.replace(QLatin1String("/"),QLatin1String("")));
 }
 
 void WebView::displayThumb(const QPixmap &thumb, int x)
 {
+    if (thumb.isNull()) {
+        // qDebug() << "displayThumb with null : " << x;
+        return;
+    }
+    // qDebug() << "displayThumb " << thumb.isNull() << thumb.size() << x <<  m_thumbnail.isNull() << m_thumbnail.size();
     m_height = 0;
     m_thumbnail = thumb;
     m_thumbx = x;
@@ -1054,6 +1086,7 @@ void WebView::displayThumb(const QPixmap &thumb, int x)
 
 void WebView::clearThumb()
 {
+    // qDebug() << "clearThumb " << m_thumbnail.isNull() << m_thumbnail.size();
     m_thumbnail = 0L;
     repaint();
 }
@@ -1063,6 +1096,8 @@ void WebView::loadLookBackItem()
     if (lookBackItem() != history()->currentItemIndex())
         history()->goToItem(history()->items().at(lookBackItem()));
 //    m_screenshot = 0L;
+//    qDebug() << "loadLookBackItem " <<  m_thumbnail.isNull() << m_thumbnail.size();
+
     m_thumbnail = 0L;
 }
 

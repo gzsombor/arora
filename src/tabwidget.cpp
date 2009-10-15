@@ -683,24 +683,12 @@ void TabWidget::webViewLoadFinished(bool ok)
     if (index != currentIndex())
         return;
 
-    if (ok)
+    if (ok) {
         emit showStatusBarMessage(tr("Finished loading"));
-    else
+        webView->takeScreenShot();
+    } else {
         emit showStatusBarMessage(tr("Failed to load"));
-
-
-    QString directory = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-    QWebPage *page = webView->page();
-    QImage image(page->viewportSize(), QImage::Format_ARGB32);
-    QPainter painter(&image);
-    page->mainFrame()->render(&painter);
-    painter.end();
-    QString filename = QString(QLatin1String("%1/%2.png"))
-                                  .arg(directory)
-                                  .arg(webView->page()->mainFrame()->url().toString().replace(QLatin1String("/"),QLatin1String("")));
-    image.save(filename);
-    webView->addScreenShot(filename);
-
+    }
 }
 
 void TabWidget::webViewIconChanged()

@@ -106,6 +106,7 @@ public:
     int lookBackItem();
     void clearScreenShot() { m_screenshot = 0L; }
     void addScreenShot(const QString &filename) { m_screenshotfiles << filename; }
+    bool takeScreenShot();
     QPixmap currentScreenImage();
     void clearThumb();
     void loadLookBackItem();
@@ -136,6 +137,7 @@ protected:
 
 private:
     int levelForZoom(int zoom);
+    QString getScreenShotPath(QString urlString);
 
 private slots:
     void setProgress(int progress);
