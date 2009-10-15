@@ -1128,7 +1128,7 @@ void TabWidget::displayThumb(int index, int x)
         return;
     if (index == currentIndex())
         return;
-  
+
     if (WebView *tab = webView(index)) {
         WebView *currentTab = webView(currentIndex());
         QPixmap image = tab->currentScreenImage();

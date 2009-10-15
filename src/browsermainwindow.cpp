@@ -1622,7 +1622,8 @@ void BrowserMainWindow::quickForward()
     currentTab()->quickForward();
 }
 
-void BrowserMainWindow::keyReleaseEvent ( QKeyEvent * event ) {
+void BrowserMainWindow::keyReleaseEvent(QKeyEvent *event)
+{
     if ((event->key() == Qt::Key_Alt) && m_lookback) {
         qDebug() << "improper key release event " << endl;
         qDebug() << currentTab()->lookBackItem() << endl;
@@ -1634,5 +1635,4 @@ void BrowserMainWindow::keyReleaseEvent ( QKeyEvent * event ) {
         return;
     }
     event->ignore();
-};
-
+}

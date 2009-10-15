@@ -180,7 +180,7 @@ private:
     void setupMenu();
     void setupToolBar();
     void updateStopReloadActionText(bool loading);
-    void keyReleaseEvent ( QKeyEvent * event );
+    void keyReleaseEvent(QKeyEvent *event);
 
 private:
     QMenu *m_fileMenu;
