@@ -1166,7 +1166,8 @@ void TabWidget::rotateThumb(int numSteps, int index, int x)
 void TabWidget::clearThumb(int index)
 {
    WebView *currentTab = webView(currentIndex());
-   currentTab->clearThumb();
+   if (currentTab) 
+      currentTab->clearThumb();
    if (WebView *tab = webView(index))
       tab->resetQuickHistory();
 }
